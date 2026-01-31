@@ -1,18 +1,15 @@
 """
-SaaS Financial Intelligence Dashboard v3.0 - Gold Master
-Dashboard profesional con optimizaciones avanzadas y UX mejorada.
+Financial Intelligence Dashboard v4.0 - Enterprise Edition
+Professional minimalist design for financial analytics.
 
-Mejoras v3.0:
-- Vectorización con .map() para alto rendimiento
-- Localización completa en español
-- Corrección de bugs en Plotly con custom_data
-- Status con emojis integrados
-- Insights automáticos inteligentes
-- Robustez total en cálculos de deltas
-- Badge de versión demo
-- Código production-ready
+Design Principles:
+- Zero emojis, pure data focus
+- Monochromatic palette with single accent color
+- High data density, minimal spacing
+- System fonts, tabular numerals
+- Excel/Stripe-inspired table layouts
 
-Author: Lead Python BI Developer
+Author: Senior Frontend Engineer (Fintech Specialist)
 Date: 2026-01-31
 """
 
@@ -29,8 +26,8 @@ from sqlalchemy import create_engine, text
 # ==================== CONFIGURACIÓN ====================
 
 st.set_page_config(
-    page_title="Dashboard Financial Intelligence",
-    page_icon="💰",
+    page_title="Financial Intelligence",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -39,7 +36,7 @@ load_dotenv()
 
 # ==================== CONSTANTES ====================
 
-# Tasas de cambio fijas (USD como base)
+# Tasas de cambio (base USD)
 EXCHANGE_RATES = {
     'USD': 1.0,
     'EUR': 1.08,
@@ -47,272 +44,231 @@ EXCHANGE_RATES = {
     'COP': 0.00025
 }
 
-# Colores consistentes
+# Colores enterprise (minimalista)
+COLOR_PRIMARY = '#0f172a'      # Slate 900
+COLOR_ACCENT = '#3b82f6'       # Blue 500
+COLOR_SUCCESS = '#10b981'      # Green 500
+COLOR_WARNING = '#f59e0b'      # Amber 500
+COLOR_DANGER = '#ef4444'       # Red 500
+COLOR_GRAY = '#6b7280'         # Gray 500
+COLOR_LIGHT_GRAY = '#e5e7eb'   # Gray 200
+
+# Status colors (minimalista)
 STATUS_COLORS = {
-    'COMPLETED': '#2ecc71',
-    'FAILED': '#e74c3c',
-    'PENDING': '#f39c12',
-    'REFUNDED': '#9b59b6'
+    'COMPLETED': COLOR_SUCCESS,
+    'FAILED': COLOR_DANGER,
+    'PENDING': COLOR_WARNING,
+    'REFUNDED': COLOR_GRAY
 }
 
-CURRENCY_COLORS = {
-    'USD': '#1f77b4',
-    'EUR': '#ff7f0e',
-    'GBP': '#2ca02c',
-    'COP': '#d62728'
-}
-
-# Emojis para Status
-STATUS_EMOJIS = {
-    'COMPLETED': '✅',
-    'FAILED': '❌',
-    'PENDING': '⏳',
-    'REFUNDED': '💰'
-}
-
-# Localización: Días de la semana en español
-DAYS_ES = {
-    'Monday': 'Lunes',
-    'Tuesday': 'Martes',
-    'Wednesday': 'Miércoles',
-    'Thursday': 'Jueves',
-    'Friday': 'Viernes',
-    'Saturday': 'Sábado',
-    'Sunday': 'Domingo'
-}
-
-# ==================== CSS PERSONALIZADO ====================
+# ==================== CSS ENTERPRISE ====================
 
 st.markdown("""
     <style>
-    /* General */
-    .main {
-        padding: 0rem 1rem;
+    /* Reset y Fuentes */
+    html, body, [class*="css"] {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 13px;
+        color: #1a1a1a;
     }
     
-    /* Badge Demo */
-    .demo-badge {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        display: inline-block;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-    }
-    
-    /* Insights Box */
-    .insights-box {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        padding: 20px;
-        border-radius: 12px;
-        color: white;
-        margin: 1rem 0;
-        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
-    }
-    
-    .insights-box h3 {
-        color: white !important;
+    /* Títulos Sobrios */
+    h1 { 
+        font-size: 24px; 
+        font-weight: 600; 
+        color: #111; 
+        letter-spacing: -0.5px; 
+        margin-bottom: 8px;
         margin-top: 0;
-        font-size: 1.2rem;
-    }
-    
-    .insights-box p {
-        margin: 0.5rem 0;
-        font-size: 1rem;
-        line-height: 1.6;
-    }
-    
-    /* Headers */
-    h1 {
-        color: #1e3a8a;
-        font-weight: 700;
     }
     
     h2 {
-        color: #334155;
+        font-size: 18px;
         font-weight: 600;
+        color: #111;
+        letter-spacing: -0.3px;
+        margin-top: 16px;
+        margin-bottom: 8px;
     }
     
-    /* Metrics */
+    h3 { 
+        font-size: 14px; 
+        font-weight: 600; 
+        color: #444; 
+        margin-top: 12px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Métricas Compactas con Números Monoespaciados */
     [data-testid="stMetricValue"] {
-        font-size: 2rem;
-        font-weight: 700;
+        font-size: 28px !important;
+        font-weight: 500 !important;
+        font-family: 'SF Mono', 'Consolas', 'Courier New', monospace !important;
+        font-variant-numeric: tabular-nums !important;
+        color: #0f172a !important;
     }
     
-    /* Tabs */
+    [data-testid="stMetricLabel"] { 
+        font-size: 11px !important; 
+        color: #666 !important; 
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+    
+    [data-testid="stMetricDelta"] { 
+        font-size: 11px !important;
+        font-family: 'SF Mono', 'Consolas', monospace !important;
+    }
+
+    /* Sidebar Minimalista */
+    [data-testid="stSidebar"] { 
+        background-color: #fafafa; 
+        border-right: 1px solid #e5e7eb;
+    }
+    
+    /* Tablas estilo Excel/Stripe */
+    .stDataFrame { 
+        border: 1px solid #e5e7eb; 
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    /* Tabs minimalistas */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 0;
+        border-bottom: 1px solid #e5e7eb;
     }
     
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        padding: 0px 24px;
-        border-radius: 8px 8px 0px 0px;
-        font-weight: 600;
+        height: 40px;
+        padding: 0px 20px;
+        background-color: transparent;
+        border: none;
+        color: #6b7280;
+        font-weight: 500;
+        font-size: 13px;
     }
     
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    .stTabs [aria-selected="true"] {
+        background-color: transparent;
+        color: #0f172a;
+        border-bottom: 2px solid #0f172a;
+    }
+    
+    /* Reducir espaciados globales */
+    .main .block-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+    
+    /* Botones minimalistas */
+    .stButton>button {
+        border: 1px solid #e5e7eb;
+        background-color: white;
+        color: #374151;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+    }
+    
+    .stButton>button:hover {
+        border-color: #9ca3af;
+        background-color: #f9fafb;
+    }
+    
+    /* Download button específico */
+    .stDownloadButton>button {
+        border: 1px solid #e5e7eb;
+        background-color: white;
+        color: #374151;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    /* Inputs y selectores minimalistas */
+    .stMultiSelect [data-baseweb="select"] {
+        border: 1px solid #e5e7eb;
+        font-size: 12px;
+    }
+    
+    /* Info boxes discretos */
+    .stAlert {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        padding: 0.75rem;
+        font-size: 12px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# ==================== FUNCIONES DE CONEXIÓN ====================
+# ==================== CONEXIÓN ====================
 
 @st.cache_resource
 def init_connection():
-    """Inicializa conexión a PostgreSQL con cache persistente."""
+    """Inicializa conexión a PostgreSQL."""
     database_url = os.getenv('DATABASE_URL')
     
     if not database_url:
-        st.error("❌ DATABASE_URL no configurado en .env")
+        st.error("DATABASE_URL not configured")
         st.stop()
     
     try:
-        engine = create_engine(
-            database_url,
-            pool_pre_ping=True,
-            pool_size=10,
-            max_overflow=20
-        )
-        # Test de conexión
+        engine = create_engine(database_url, pool_pre_ping=True, pool_size=10, max_overflow=20)
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return engine
     except Exception as e:
-        st.error(f"❌ Error al conectar a PostgreSQL: {e}")
+        st.error(f"Database connection failed: {e}")
         st.stop()
 
 
 @st.cache_data(ttl=300)
 def load_data():
-    """
-    Carga datos desde PostgreSQL con transformaciones optimizadas.
-    
-    OPTIMIZACIÓN v3.0: Usa vectorización con .map() en lugar de .apply()
-    """
+    """Carga y transforma datos con optimización vectorizada."""
     engine = init_connection()
     
     query = """
-    SELECT 
-        id, timestamp, amount, currency, status,
-        client_email, client_ip, client_device, metadata
+    SELECT id, timestamp, amount, currency, status,
+           client_email, client_ip, client_device, metadata
     FROM transactions
     ORDER BY timestamp DESC
     """
     
     try:
         df = pd.read_sql(query, engine)
-        
-        # Convertir timestamp
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         
-        # OPTIMIZACIÓN: Normalización vectorizada (mucho más rápido que .apply())
+        # Vectorización pura
         df['amount_usd'] = df['amount'] * df['currency'].map(EXCHANGE_RATES).fillna(1.0)
         
-        # Columnas temporales
+        # Temporal data
         df['date'] = df['timestamp'].dt.date
         df['year_month'] = df['timestamp'].dt.to_period('M').astype(str)
         df['week'] = df['timestamp'].dt.to_period('W').astype(str)
-        
-        # LOCALIZACIÓN: Días en español con .map()
-        df['day_of_week'] = df['timestamp'].dt.day_name().map(DAYS_ES)
+        df['day_of_week'] = df['timestamp'].dt.day_name()
         df['hour'] = df['timestamp'].dt.hour
         
-        # UX: Status con emojis integrados
-        df['status_icon'] = df['status'].map(lambda x: f"{STATUS_EMOJIS.get(x, '📊')} {x}")
+        # Formato fecha ISO corto
+        df['date_display'] = df['timestamp'].dt.strftime('%a, %b %d')
         
         return df
     
     except Exception as e:
-        st.error(f"❌ Error al cargar datos: {e}")
+        st.error(f"Data loading failed: {e}")
         st.stop()
 
-# ==================== FUNCIONES DE ANÁLISIS ====================
+# ==================== UTILIDADES ====================
 
-def calculate_insights(df):
-    """
-    Genera insights automáticos del dataset.
-    
-    Returns:
-        dict con insights clave
-    """
-    insights = {}
-    
-    try:
-        # Moneda con mayor volumen (USD normalizado)
-        currency_volume = df.groupby('currency')['amount_usd'].sum()
-        top_currency = currency_volume.idxmax()
-        top_currency_volume = currency_volume.max()
-        top_currency_pct = (top_currency_volume / df['amount_usd'].sum() * 100)
-        
-        insights['top_currency'] = top_currency
-        insights['top_currency_volume'] = top_currency_volume
-        insights['top_currency_pct'] = top_currency_pct
-        
-        # Día más activo
-        day_activity = df.groupby('day_of_week').size()
-        busiest_day = day_activity.idxmax()
-        busiest_day_count = day_activity.max()
-        
-        insights['busiest_day'] = busiest_day
-        insights['busiest_day_count'] = busiest_day_count
-        
-        # Tasa de éxito
-        success_rate = (len(df[df['status'] == 'COMPLETED']) / len(df) * 100)
-        insights['success_rate'] = success_rate
-        
-    except Exception as e:
-        st.warning(f"No se pudieron generar algunos insights: {e}")
-        insights = {
-            'top_currency': 'N/A',
-            'top_currency_volume': 0,
-            'top_currency_pct': 0,
-            'busiest_day': 'N/A',
-            'busiest_day_count': 0,
-            'success_rate': 0
-        }
-    
-    return insights
-
-
-def calculate_delta_robust(df, metric_col='amount_usd', period_col='year_month'):
-    """
-    Calcula delta % de forma robusta con manejo completo de errores.
-    
-    ROBUSTEZ v3.0: No falla con rangos de fecha cortos.
-    """
-    try:
-        if len(df) == 0 or period_col not in df.columns:
-            return 0
-        
-        periods = sorted(df[period_col].unique())
-        
-        if len(periods) < 2:
-            return 0
-        
-        current_period = periods[-1]
-        previous_period = periods[-2]
-        
-        current_value = df[df[period_col] == current_period][metric_col].sum()
-        previous_value = df[df[period_col] == previous_period][metric_col].sum()
-        
-        if previous_value == 0:
-            return 0
-        
-        delta = ((current_value - previous_value) / previous_value * 100)
-        return delta
-    
-    except Exception:
-        return 0
-
-
-def format_currency_usd(value):
-    """Formatea valores en USD con sufijos."""
+def format_currency(value):
+    """Formatea moneda con estilo financiero."""
     if pd.isna(value) or value == 0:
         return "$0"
     
@@ -323,394 +279,398 @@ def format_currency_usd(value):
     elif abs(value) >= 1_000:
         return f"${value/1_000:.1f}K"
     else:
-        return f"${value:.2f}"
+        return f"${value:,.2f}"
 
-# ==================== COMPONENTES DE VISUALIZACIÓN ====================
 
-def render_insights_banner(insights):
-    """Renderiza banner de insights automáticos."""
-    st.markdown(f"""
-    <div class="insights-box">
-        <h3>🎯 Insights Automáticos</h3>
-        <p><strong>💰 Moneda Dominante:</strong> {insights['top_currency']} con {format_currency_usd(insights['top_currency_volume'])} USD 
-        ({insights['top_currency_pct']:.1f}% del volumen total)</p>
-        <p><strong>📅 Día Más Activo:</strong> {insights['busiest_day']} con {insights['busiest_day_count']:,} transacciones</p>
-        <p><strong>✅ Tasa de Éxito Global:</strong> {insights['success_rate']:.1f}% de transacciones completadas</p>
-    </div>
-    """, unsafe_allow_html=True)
+def format_number(value):
+    """Formatea números con separadores."""
+    return f"{value:,}" if not pd.isna(value) else "0"
+
+
+def calculate_delta(df, metric_col='amount_usd', period_col='year_month'):
+    """Calcula delta % robusto."""
+    try:
+        if len(df) == 0 or period_col not in df.columns:
+            return 0
+        
+        periods = sorted(df[period_col].unique())
+        if len(periods) < 2:
+            return 0
+        
+        current = df[df[period_col] == periods[-1]][metric_col].sum()
+        previous = df[df[period_col] == periods[-2]][metric_col].sum()
+        
+        if previous == 0:
+            return 0
+        
+        return ((current - previous) / previous * 100)
+    except:
+        return 0
+
+# ==================== COMPONENTES ====================
+
+def render_ledger_table(df):
+    """Tabla resumen estilo libro mayor (The Ledger)."""
+    st.markdown("### Currency Ledger")
+    
+    ledger = df.groupby('currency').agg({
+        'amount_usd': 'sum',
+        'id': 'count'
+    }).reset_index()
+    
+    total_volume = ledger['amount_usd'].sum()
+    ledger['percentage'] = (ledger['amount_usd'] / total_volume * 100).round(2)
+    
+    ledger.columns = ['Currency', 'Volume (USD)', 'Transactions', '% of Total']
+    ledger = ledger.sort_values('Volume (USD)', ascending=False)
+    
+    # Formatear
+    ledger['Volume (USD)'] = ledger['Volume (USD)'].apply(format_currency)
+    ledger['Transactions'] = ledger['Transactions'].apply(format_number)
+    ledger['% of Total'] = ledger['% of Total'].apply(lambda x: f"{x}%")
+    
+    st.dataframe(
+        ledger,
+        use_container_width=True,
+        hide_index=True,
+        height=180
+    )
 
 
 def render_kpis(df):
-    """Renderiza KPIs principales con deltas robustos."""
-    st.subheader("📊 Métricas Principales (USD Normalizado)")
-    
+    """KPIs minimalistas con números monoespaciados."""
     if len(df) == 0:
-        st.warning("⚠️ No hay datos para mostrar")
+        st.warning("No data available")
         return
     
     col1, col2, col3, col4 = st.columns(4)
     
-    # KPI 1: Total Transacciones
-    total_txns = len(df)
-    txn_delta = calculate_delta_robust(
-        df.groupby('year_month').size().reset_index(name='count').assign(amount_usd=lambda x: x['count']),
-        metric_col='amount_usd',
-        period_col='year_month'
+    # Total Transactions
+    total = len(df)
+    delta_txn = calculate_delta(
+        df.groupby('year_month').size().reset_index(name='count').assign(amount_usd=lambda x: x['count'])
     )
     
     with col1:
         st.metric(
-            label="📊 Total Transacciones",
-            value=f"{total_txns:,}",
-            delta=f"{txn_delta:+.1f}% vs mes anterior" if txn_delta != 0 else None,
-            help="Cantidad total de transacciones"
+            label="Total Transactions",
+            value=format_number(total),
+            delta=f"{delta_txn:+.1f}% MoM" if delta_txn != 0 else None
         )
     
-    # KPI 2: Volumen Total USD
-    total_volume = df['amount_usd'].sum()
-    volume_delta = calculate_delta_robust(df, 'amount_usd', 'year_month')
+    # Total Volume
+    volume = df['amount_usd'].sum()
+    delta_vol = calculate_delta(df)
     
     with col2:
         st.metric(
-            label="💰 Volumen Total",
-            value=format_currency_usd(total_volume),
-            delta=f"{volume_delta:+.1f}% vs mes anterior" if volume_delta != 0 else None,
-            help="Suma total normalizada a USD"
+            label="Total Volume",
+            value=format_currency(volume),
+            delta=f"{delta_vol:+.1f}% MoM" if delta_vol != 0 else None
         )
     
-    # KPI 3: Ticket Promedio
-    avg_ticket = df['amount_usd'].mean()
-    
-    # Calcular delta de promedio de forma robusta
+    # Average Ticket
+    avg = df['amount_usd'].mean()
     try:
         periods = sorted(df['year_month'].unique())
         if len(periods) >= 2:
-            current_avg = df[df['year_month'] == periods[-1]]['amount_usd'].mean()
+            curr_avg = df[df['year_month'] == periods[-1]]['amount_usd'].mean()
             prev_avg = df[df['year_month'] == periods[-2]]['amount_usd'].mean()
-            avg_delta = ((current_avg - prev_avg) / prev_avg * 100) if prev_avg > 0 else 0
+            delta_avg = ((curr_avg - prev_avg) / prev_avg * 100) if prev_avg > 0 else 0
         else:
-            avg_delta = 0
+            delta_avg = 0
     except:
-        avg_delta = 0
+        delta_avg = 0
     
     with col3:
         st.metric(
-            label="🎯 Ticket Promedio",
-            value=format_currency_usd(avg_ticket),
-            delta=f"{avg_delta:+.1f}% vs mes anterior" if avg_delta != 0 else None,
-            help="Promedio por transacción en USD"
+            label="Average Ticket",
+            value=format_currency(avg),
+            delta=f"{delta_avg:+.1f}% MoM" if delta_avg != 0 else None
         )
     
-    # KPI 4: Tasa de Éxito
+    # Success Rate
     completed = len(df[df['status'] == 'COMPLETED'])
     success_rate = (completed / len(df) * 100) if len(df) > 0 else 0
     
     with col4:
         st.metric(
-            label="✅ Tasa de Éxito",
+            label="Success Rate",
             value=f"{success_rate:.1f}%",
-            delta=f"{completed:,} completadas",
-            help="Porcentaje de transacciones exitosas"
+            delta=f"{completed:,} completed"
         )
 
 
 def create_trend_chart(df):
-    """Gráfico de tendencia temporal."""
+    """Gráfico minimalista de tendencia."""
     daily = df.groupby('date').agg({
         'amount_usd': 'sum',
         'id': 'count'
     }).reset_index()
-    daily.columns = ['Fecha', 'Volumen USD', 'Cantidad']
     
     fig = go.Figure()
     
+    # Área principal
     fig.add_trace(go.Scatter(
-        x=daily['Fecha'],
-        y=daily['Volumen USD'],
-        name='Volumen (USD)',
-        mode='lines+markers',
-        line=dict(color='#3b82f6', width=3),
-        marker=dict(size=6),
+        x=daily['date'],
+        y=daily['amount_usd'],
+        name='Volume',
+        mode='lines',
+        line=dict(color=COLOR_ACCENT, width=2),
         fill='tozeroy',
-        fillcolor='rgba(59, 130, 246, 0.1)',
-        yaxis='y',
-        hovertemplate='<b>%{x}</b><br>Volumen: $%{y:,.2f}<extra></extra>'
-    ))
-    
-    fig.add_trace(go.Scatter(
-        x=daily['Fecha'],
-        y=daily['Cantidad'],
-        name='# Transacciones',
-        mode='lines+markers',
-        line=dict(color='#f59e0b', width=2, dash='dash'),
-        marker=dict(size=4),
-        yaxis='y2',
-        hovertemplate='<b>%{x}</b><br>Transacciones: %{y:,}<extra></extra>'
+        fillcolor=f'rgba(59, 130, 246, 0.1)',
+        hovertemplate='<b>%{x}</b><br>Volume: $%{y:,.0f}<extra></extra>'
     ))
     
     fig.update_layout(
-        title='📈 Tendencia Temporal de Transacciones',
-        xaxis_title='Fecha',
-        yaxis=dict(
-            title='Volumen (USD)',
-            titlefont=dict(color='#3b82f6'),
-            tickformat='$,.0f'
-        ),
-        yaxis2=dict(
-            title='Número de Transacciones',
-            titlefont=dict(color='#f59e0b'),
-            overlaying='y',
-            side='right'
-        ),
-        height=400,
+        title='Daily Volume Trend',
+        xaxis_title='',
+        yaxis_title='Volume (USD)',
+        height=300,
+        margin=dict(l=40, r=20, t=40, b=30),
         hovermode='x unified',
         template='plotly_white',
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        font=dict(family='Inter, sans-serif', size=11),
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
+    
+    fig.update_xaxes(showgrid=False, zeroline=False)
+    fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
     
     return fig
 
 
-def create_status_donut(df):
-    """Gráfico donut de distribución de status."""
-    status_dist = df.groupby('status').size().reset_index(name='Cantidad')
+def create_status_chart(df):
+    """Gráfico de barras horizontal minimalista."""
+    status_data = df.groupby('status').size().reset_index(name='count')
+    status_data = status_data.sort_values('count', ascending=True)
     
-    colors = [STATUS_COLORS.get(s, '#94a3b8') for s in status_dist['status']]
+    colors = [STATUS_COLORS.get(s, COLOR_GRAY) for s in status_data['status']]
     
-    fig = go.Figure(data=[go.Pie(
-        labels=status_dist['status'],
-        values=status_dist['Cantidad'],
-        hole=0.5,
-        marker=dict(colors=colors, line=dict(color='#ffffff', width=2)),
-        textinfo='label+percent',
-        textfont=dict(size=12),
-        hovertemplate='<b>%{label}</b><br>Transacciones: %{value:,}<br>%{percent}<extra></extra>'
-    )])
+    fig = go.Figure(go.Bar(
+        x=status_data['count'],
+        y=status_data['status'],
+        orientation='h',
+        marker=dict(color=colors),
+        text=status_data['count'],
+        textposition='outside',
+        texttemplate='%{text:,}',
+        hovertemplate='<b>%{y}</b><br>Count: %{x:,}<extra></extra>'
+    ))
     
     fig.update_layout(
-        title='📊 Distribución por Estado',
-        height=400,
+        title='Status Distribution',
+        xaxis_title='',
+        yaxis_title='',
+        height=250,
+        margin=dict(l=80, r=40, t=40, b=30),
         template='plotly_white',
-        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+        font=dict(family='Inter, sans-serif', size=11),
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
+    
+    fig.update_xaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False)
+    fig.update_yaxes(showgrid=False)
     
     return fig
 
 
 def create_currency_chart(df):
-    """
-    Gráfico de barras por moneda.
-    
-    CORRECCIÓN v3.0: Usa custom_data para evitar bug de hover.
-    """
+    """Gráfico de barras por moneda (escala de grises)."""
     currency_data = df.groupby('currency').agg({
         'amount': 'sum',
         'id': 'count'
     }).reset_index()
-    currency_data.columns = ['Moneda', 'Volumen', 'Cantidad']
-    currency_data = currency_data.sort_values('Cantidad', ascending=False)
+    currency_data = currency_data.sort_values('amount', ascending=False)
     
-    fig = px.bar(
-        currency_data,
-        x='Moneda',
-        y='Volumen',
-        title='💵 Volumen por Moneda (Moneda Original)',
-        labels={'Volumen': 'Volumen Total'},
-        color='Moneda',
-        color_discrete_map=CURRENCY_COLORS,
-        text='Volumen',
-        custom_data=['Cantidad']  # CORRECCIÓN: Pasar cantidad como custom_data
-    )
+    # Colores en escala de grises
+    gray_scale = ['#374151', '#6b7280', '#9ca3af', '#d1d5db']
+    colors = [gray_scale[i % len(gray_scale)] for i in range(len(currency_data))]
     
-    fig.update_traces(
-        texttemplate='%{text:,.0f}',
+    fig = go.Figure(go.Bar(
+        x=currency_data['currency'],
+        y=currency_data['amount'],
+        marker=dict(color=colors),
+        text=currency_data['amount'],
         textposition='outside',
-        hovertemplate='<b>%{x}</b><br>Volumen: %{y:,.2f}<br>Transacciones: %{customdata[0]:,}<extra></extra>'
-    )
+        texttemplate='%{text:,.0f}',
+        customdata=currency_data['id'],
+        hovertemplate='<b>%{x}</b><br>Volume: %{y:,.0f}<br>Transactions: %{customdata:,}<extra></extra>'
+    ))
     
     fig.update_layout(
+        title='Volume by Currency (Original)',
+        xaxis_title='',
+        yaxis_title='',
+        height=300,
+        margin=dict(l=40, r=20, t=40, b=30),
+        template='plotly_white',
+        font=dict(family='Inter, sans-serif', size=11),
         showlegend=False,
-        height=400,
-        template='plotly_white'
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
+    
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat=',')
     
     return fig
 
 
 def create_device_chart(df):
-    """Gráfico de barras por dispositivo."""
+    """Gráfico simple de dispositivos."""
     device_data = df.groupby('client_device').agg({
-        'amount_usd': 'sum',
-        'id': 'count'
+        'amount_usd': 'sum'
     }).reset_index()
-    device_data.columns = ['Dispositivo', 'Volumen USD', 'Cantidad']
     
-    fig = px.bar(
-        device_data,
-        x='Dispositivo',
-        y='Volumen USD',
-        title='📱 Volumen por Dispositivo (USD)',
-        color='Dispositivo',
-        color_discrete_map={'mobile': '#f59e0b', 'desktop': '#3b82f6'},
-        text='Volumen USD',
-        custom_data=['Cantidad']
-    )
-    
-    fig.update_traces(
-        texttemplate='$%{text:,.0f}',
+    fig = go.Figure(go.Bar(
+        x=device_data['client_device'],
+        y=device_data['amount_usd'],
+        marker=dict(color=[COLOR_ACCENT, COLOR_GRAY]),
+        text=device_data['amount_usd'],
         textposition='outside',
-        hovertemplate='<b>%{x}</b><br>Volumen: $%{y:,.0f}<br>Transacciones: %{customdata[0]:,}<extra></extra>'
-    )
-    
-    fig.update_layout(
-        showlegend=False,
-        height=350,
-        template='plotly_white'
-    )
-    
-    return fig
-
-
-def create_heatmap(df):
-    """Heatmap de actividad por día y hora."""
-    heatmap_data = df.groupby(['day_of_week', 'hour']).size().reset_index(name='Cantidad')
-    heatmap_pivot = heatmap_data.pivot(index='day_of_week', columns='hour', values='Cantidad').fillna(0)
-    
-    # Ordenar días
-    days_order = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-    heatmap_pivot = heatmap_pivot.reindex([d for d in days_order if d in heatmap_pivot.index])
-    
-    fig = go.Figure(data=go.Heatmap(
-        z=heatmap_pivot.values,
-        x=heatmap_pivot.columns,
-        y=heatmap_pivot.index,
-        colorscale='Blues',
-        text=heatmap_pivot.values,
-        texttemplate='%{text:.0f}',
-        textfont={"size": 10},
-        hovertemplate='<b>%{y}</b><br>Hora: %{x}:00<br>Transacciones: %{z:.0f}<extra></extra>'
+        texttemplate='$%{text:,.0f}',
+        hovertemplate='<b>%{x}</b><br>Volume: $%{y:,.0f}<extra></extra>'
     ))
     
     fig.update_layout(
-        title='🔥 Mapa de Calor: Actividad por Día y Hora',
-        xaxis_title='Hora del Día',
-        yaxis_title='Día de la Semana',
-        height=350,
-        template='plotly_white'
+        title='Volume by Device (USD)',
+        xaxis_title='',
+        yaxis_title='',
+        height=280,
+        margin=dict(l=40, r=20, t=40, b=30),
+        template='plotly_white',
+        font=dict(family='Inter, sans-serif', size=11),
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
+    
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
     
     return fig
 
 
-def render_advanced_table(df):
-    """Tabla avanzada con configuración profesional."""
+def render_data_table(df):
+    """Tabla de datos estilo Excel."""
     display_df = df.head(100).copy()
     
     column_config = {
         "timestamp": st.column_config.DatetimeColumn(
-            "Fecha/Hora",
-            format="DD/MM/YYYY HH:mm",
+            "Date/Time",
+            format="MMM DD, YYYY HH:mm",
             width="medium"
         ),
         "amount": st.column_config.NumberColumn(
-            "Monto",
+            "Amount",
             format="%.2f",
             width="small"
         ),
         "amount_usd": st.column_config.NumberColumn(
-            "Monto USD",
+            "Amount USD",
             format="$%.2f",
             width="medium"
         ),
         "currency": st.column_config.TextColumn(
-            "💱 Moneda",
+            "Currency",
             width="small"
         ),
-        "status_icon": st.column_config.TextColumn(
-            "📊 Estado",
-            width="medium"
+        "status": st.column_config.TextColumn(
+            "Status",
+            width="small"
         ),
         "client_email": st.column_config.TextColumn(
-            "📧 Cliente",
+            "Client",
             width="large"
         ),
         "client_device": st.column_config.TextColumn(
-            "📱 Dispositivo",
+            "Device",
             width="small"
         )
     }
     
-    columns_show = [
-        'timestamp', 'amount', 'currency', 'amount_usd',
-        'status_icon', 'client_email', 'client_device'
-    ]
+    columns = ['timestamp', 'amount', 'currency', 'amount_usd', 'status', 'client_email', 'client_device']
     
     st.dataframe(
-        display_df[columns_show],
+        display_df[columns],
         column_config=column_config,
         use_container_width=True,
         height=500,
         hide_index=True
     )
 
-# ==================== APLICACIÓN PRINCIPAL ====================
+# ==================== MAIN ====================
 
 def main():
-    """Función principal del dashboard."""
+    """Aplicación principal."""
     
-    # Badge de versión demo
-    st.markdown("""
-    <div class="demo-badge">
-        ⚡ DEMO VERSION v3.0: Métricas normalizadas a USD con tasas fijas
-    </div>
-    """, unsafe_allow_html=True)
+    # Header minimalista
+    col1, col2 = st.columns([3, 1])
     
-    # Header
-    st.title("💰 Dashboard de Inteligencia Financiera SaaS")
-    st.markdown("**Análisis profesional con normalización de monedas y insights automáticos**")
+    with col1:
+        st.title("Financial Intelligence")
+        st.caption("Real-time transaction analytics | USD normalized")
+    
+    with col2:
+        # Export button discreto
+        if st.button("Export Data", type="secondary", use_container_width=False):
+            st.session_state.show_export = True
+    
     st.markdown("---")
     
     # Cargar datos
-    with st.spinner("📊 Cargando datos desde PostgreSQL..."):
+    with st.spinner("Loading data..."):
         df = load_data()
     
     # ==================== SIDEBAR ====================
     
-    st.sidebar.title("🔍 Filtros")
-    st.sidebar.markdown("---")
+    st.sidebar.markdown("### Filters")
     
     # Filtros
     all_currencies = sorted(df['currency'].unique())
     selected_currencies = st.sidebar.multiselect(
-        "💵 Monedas",
+        "Currency",
         options=all_currencies,
         default=all_currencies
     )
     
     all_statuses = sorted(df['status'].unique())
     selected_statuses = st.sidebar.multiselect(
-        "📊 Estados",
+        "Status",
         options=all_statuses,
         default=all_statuses
     )
     
     st.sidebar.markdown("---")
+    
     date_range = st.sidebar.date_input(
-        "📅 Rango de Fechas",
+        "Date Range",
         value=(df['timestamp'].min().date(), df['timestamp'].max().date()),
         min_value=df['timestamp'].min().date(),
         max_value=df['timestamp'].max().date()
     )
     
-    # Info de tasas
     st.sidebar.markdown("---")
-    st.sidebar.info(
-        "**💱 Tasas de Cambio a USD**\n\n" +
-        "• USD: 1.00\n" +
-        "• EUR: 1.08\n" +
-        "• GBP: 1.27\n" +
-        "• COP: 0.00025"
-    )
+    
+    # Export en sidebar si activado
+    if st.session_state.get('show_export', False):
+        csv = df.to_csv(index=False)
+        st.sidebar.download_button(
+            label="Download CSV",
+            data=csv,
+            file_name=f"transactions_{datetime.now().strftime('%Y%m%d')}.csv",
+            mime="text/csv"
+        )
+    
+    st.sidebar.markdown("---")
+    st.sidebar.caption("Exchange Rates (Fixed)")
+    st.sidebar.caption("USD: 1.00 | EUR: 1.08")
+    st.sidebar.caption("GBP: 1.27 | COP: 0.00025")
     
     # ==================== APLICAR FILTROS ====================
     
@@ -730,26 +690,21 @@ def main():
         ]
     
     st.sidebar.markdown("---")
-    st.sidebar.success(f"✅ {len(df_filtered):,} transacciones")
-    st.sidebar.caption(f"Total: {len(df):,}")
+    st.sidebar.metric("Filtered Records", format_number(len(df_filtered)))
+    st.sidebar.caption(f"Total: {format_number(len(df))}")
     
     if len(df_filtered) == 0:
-        st.warning("⚠️ No hay datos con estos filtros")
+        st.warning("No data matches the selected filters")
         return
     
     # ==================== TABS ====================
     
-    tab1, tab2, tab3 = st.tabs([
-        "📈 Resumen",
-        "🌍 Detalle",
-        "📋 Datos"
-    ])
+    tab1, tab2, tab3 = st.tabs(["Overview", "Analysis", "Data"])
     
-    # TAB 1: RESUMEN
+    # TAB 1: OVERVIEW
     with tab1:
-        # Insights automáticos
-        insights = calculate_insights(df_filtered)
-        render_insights_banner(insights)
+        # Ledger table primero
+        render_ledger_table(df_filtered)
         
         st.markdown("---")
         
@@ -759,37 +714,37 @@ def main():
         st.markdown("---")
         
         # Gráficos principales
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([2, 1])
         
         with col1:
             st.plotly_chart(create_trend_chart(df_filtered), use_container_width=True)
         
         with col2:
-            st.plotly_chart(create_status_donut(df_filtered), use_container_width=True)
+            st.plotly_chart(create_status_chart(df_filtered), use_container_width=True)
         
         # Stats adicionales
         st.markdown("---")
-        st.subheader("📊 Estadísticas Adicionales")
+        st.markdown("### Key Statistics")
         
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("💎 Máxima", format_currency_usd(df_filtered['amount_usd'].max()))
+            st.metric("Max Transaction", format_currency(df_filtered['amount_usd'].max()))
         
         with col2:
-            st.metric("💵 Mínima", format_currency_usd(df_filtered['amount_usd'].min()))
+            st.metric("Min Transaction", format_currency(df_filtered['amount_usd'].min()))
         
         with col3:
             unique = df_filtered['client_email'].nunique()
-            st.metric("👥 Clientes", f"{unique:,}")
+            st.metric("Unique Clients", format_number(unique))
         
         with col4:
             mobile_pct = len(df_filtered[df_filtered['client_device'] == 'mobile']) / len(df_filtered) * 100
-            st.metric("📱 Mobile", f"{mobile_pct:.1f}%")
+            st.metric("Mobile Share", f"{mobile_pct:.1f}%")
     
-    # TAB 2: DETALLE
+    # TAB 2: ANALYSIS
     with tab2:
-        st.subheader("🌍 Análisis Detallado por Segmentos")
+        st.markdown("### Segment Analysis")
         
         col1, col2 = st.columns(2)
         
@@ -800,49 +755,28 @@ def main():
             st.plotly_chart(create_device_chart(df_filtered), use_container_width=True)
         
         st.markdown("---")
-        st.plotly_chart(create_heatmap(df_filtered), use_container_width=True)
-        
-        st.markdown("---")
-        st.subheader("📊 Resumen por Estado")
+        st.markdown("### Status Breakdown")
         
         status_summary = df_filtered.groupby('status').agg({
             'amount_usd': ['sum', 'mean', 'count']
         }).round(2)
-        status_summary.columns = ['Volumen Total USD', 'Promedio USD', 'Cantidad']
-        status_summary['Volumen Total USD'] = status_summary['Volumen Total USD'].apply(format_currency_usd)
-        status_summary['Promedio USD'] = status_summary['Promedio USD'].apply(format_currency_usd)
+        status_summary.columns = ['Total Volume', 'Average', 'Count']
+        status_summary['Total Volume'] = status_summary['Total Volume'].apply(format_currency)
+        status_summary['Average'] = status_summary['Average'].apply(format_currency)
+        status_summary['Count'] = status_summary['Count'].apply(format_number)
         
         st.dataframe(status_summary, use_container_width=True)
     
-    # TAB 3: DATOS
+    # TAB 3: DATA
     with tab3:
-        st.subheader("📋 Últimas 100 Transacciones")
-        st.caption("Nota: Montos normalizados a USD con tasas fijas")
+        st.markdown("### Transaction Data (Last 100)")
+        st.caption("All amounts normalized to USD using fixed exchange rates")
         
-        render_advanced_table(df_filtered)
-        
-        st.markdown("---")
-        
-        col1, col2 = st.columns([3, 1])
-        
-        with col2:
-            csv = df_filtered.to_csv(index=False)
-            st.download_button(
-                label="📥 Descargar CSV",
-                data=csv,
-                file_name=f"transacciones_{datetime.now().strftime('%Y%m%d')}.csv",
-                mime="text/csv"
-            )
+        render_data_table(df_filtered)
     
-    # Footer
+    # Footer minimalista
     st.markdown("---")
-    st.markdown(f"""
-    <div style='text-align: center; color: #64748b; padding: 20px;'>
-        <p><b>Actualizado:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-        <p>Dashboard v3.0 Gold Master | PostgreSQL en Railway</p>
-        <p><small>Lead Python BI Developer</small></p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | PostgreSQL on Railway | v4.0 Enterprise")
 
 
 if __name__ == "__main__":
