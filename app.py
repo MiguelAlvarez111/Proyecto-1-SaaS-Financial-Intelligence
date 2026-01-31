@@ -397,12 +397,14 @@ def get_time_ago(dt):
     now = datetime.now()
     diff = now - dt
     
-    if diff.seconds < 60:
-        return f"{diff.seconds}s ago"
-    elif diff.seconds < 3600:
-        return f"{diff.seconds // 60}m ago"
-    elif diff.seconds < 86400:
-        return f"{diff.seconds // 3600}h ago"
+    total_seconds = int(diff.total_seconds())
+    
+    if total_seconds < 60:
+        return f"{total_seconds}s ago"
+    elif total_seconds < 3600:
+        return f"{total_seconds // 60}m ago"
+    elif total_seconds < 86400:
+        return f"{total_seconds // 3600}h ago"
     else:
         return f"{diff.days}d ago"
 
@@ -863,15 +865,17 @@ def main():
             device_data = df_filtered.groupby('client_device').agg({
                 'amount_usd': 'sum'
             }).reset_index()
+            device_data = device_data.sort_values('amount_usd', ascending=True)
             
             fig = go.Figure(go.Bar(
-                x=device_data['client_device'],
-                y=device_data['amount_usd'],
-                marker=dict(color=['#6366f1', '#10b981']),
+                x=device_data['amount_usd'],
+                y=device_data['client_device'],
+                orientation='h',
+                marker=dict(color=['#10b981', '#6366f1']),
                 text=device_data['amount_usd'],
                 textposition='outside',
                 texttemplate='$%{text:,.0f}',
-                hovertemplate='<b>%{x}</b><br>Volume: $%{y:,.0f}<extra></extra>'
+                hovertemplate='<b>%{y}</b><br>Volume: $%{x:,.0f}<extra></extra>'
             ))
             
             fig.update_layout(
@@ -882,7 +886,7 @@ def main():
                 xaxis_title='',
                 yaxis_title='',
                 height=350,
-                margin=dict(l=60, r=40, t=60, b=40),
+                margin=dict(l=80, r=100, t=60, b=40),
                 template='plotly_white',
                 font=dict(family='Inter, sans-serif', size=12),
                 showlegend=False,
@@ -890,8 +894,8 @@ def main():
                 paper_bgcolor='rgba(0,0,0,0)'
             )
             
-            fig.update_xaxes(showgrid=False)
-            fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
+            fig.update_xaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
+            fig.update_yaxes(showgrid=False)
             
             st.plotly_chart(fig, use_container_width=True)
         
