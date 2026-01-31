@@ -1,16 +1,9 @@
 """
-Financial Intelligence Dashboard v6.0 - UX Enhanced Edition
-Professional card-based dashboard with Nielsen Heuristics implementation.
+Financial Intelligence Dashboard v6.1 - Layout Fixed
+Professional card-based dashboard with corrected Streamlit layout.
 
-UX Improvements:
-- Heuristic 1: Live status indicator, visible timestamps
-- Heuristic 3: Reset filters button, quick date filters
-- Heuristic 5: Defensive validation, empty state handling
-- Heuristic 6: Currency labels with flags
-- Heuristic 7: Quick filters, session state persistence
-- Heuristic 9: Improved error messages and recovery
-- Heuristic 10: Tooltips, help button, contextual guidance
-- Accessibility: WCAG 2.1 compliant contrast, ARIA labels, focus states
+CRITICAL FIX: Removed HTML div wrappers that were breaking Streamlit layout.
+Now uses native Streamlit containers with CSS styling only.
 
 Author: Senior UI/UX Designer
 Date: 2026-01-31
@@ -54,13 +47,13 @@ CURRENCY_DISPLAY = {
     'COP': '🇨🇴 COP - Colombian Peso'
 }
 
-# WCAG 2.1 compliant colors (4.5:1 contrast minimum)
-COLOR_PRIMARY = '#6366f1'      # Indigo 500
-COLOR_SUCCESS = '#059669'      # Green 600 (darker for contrast)
-COLOR_WARNING = '#d97706'      # Amber 600
-COLOR_DANGER = '#dc2626'       # Red 600 (darker for contrast)
-COLOR_INFO = '#2563eb'         # Blue 600
-COLOR_GRAY = '#6b7280'         # Gray 500
+# WCAG 2.1 compliant colors
+COLOR_PRIMARY = '#6366f1'
+COLOR_SUCCESS = '#059669'
+COLOR_WARNING = '#d97706'
+COLOR_DANGER = '#dc2626'
+COLOR_INFO = '#2563eb'
+COLOR_GRAY = '#6b7280'
 
 STATUS_COLORS = {
     'COMPLETED': COLOR_SUCCESS,
@@ -69,7 +62,7 @@ STATUS_COLORS = {
     'REFUNDED': COLOR_INFO
 }
 
-# ==================== CSS MODERN CARD UI + ACCESSIBILITY ====================
+# ==================== CSS FIXED LAYOUT ====================
 
 st.markdown("""
     <style>
@@ -95,106 +88,14 @@ st.markdown("""
         padding-right: 3rem;
     }
     
-    /* Card Component */
-    .card {
+    /* FIXED: Use Streamlit containers with background instead of wrapping divs */
+    [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"] {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
         padding: 24px;
         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         margin-bottom: 20px;
-        transition: box-shadow 0.3s ease;
-    }
-    
-    .card:hover {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Card para KPIs */
-    .card-kpi {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        margin-bottom: 16px;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    
-    /* Hero KPI (primer KPI más grande) */
-    .card-kpi-hero {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-        border: none;
-        color: white;
-        min-height: 140px;
-    }
-    
-    .card-kpi-hero [data-testid="stMetricValue"] {
-        color: white !important;
-        font-size: 40px !important;
-    }
-    
-    .card-kpi-hero [data-testid="stMetricLabel"] {
-        color: rgba(255, 255, 255, 0.9) !important;
-    }
-    
-    .card-kpi-hero [data-testid="stMetricDelta"] {
-        color: rgba(255, 255, 255, 0.8) !important;
-    }
-    
-    /* Live Status Indicator */
-    .live-indicator {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        background: #f0fdf4;
-        border: 1px solid #86efac;
-        border-radius: 20px;
-        font-size: 12px;
-        color: #166534;
-        font-weight: 500;
-    }
-    
-    .live-dot {
-        width: 8px;
-        height: 8px;
-        background: #22c55e;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    
-    /* Help Button */
-    .help-button {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        width: 56px;
-        height: 56px;
-        background: #6366f1;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        cursor: pointer;
-        font-size: 24px;
-        z-index: 1000;
-        transition: transform 0.2s;
-    }
-    
-    .help-button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     
     /* Typography */
@@ -222,7 +123,7 @@ st.markdown("""
         margin-bottom: 12px;
     }
     
-    /* Metrics - Diseño Card */
+    /* Metrics */
     [data-testid="stMetricValue"] {
         font-size: 32px !important;
         font-weight: 700 !important;
@@ -311,7 +212,7 @@ st.markdown("""
         background-color: #4f46e5;
     }
     
-    /* Focus States - WCAG 2.1 Accessibility */
+    /* Focus States - WCAG 2.1 */
     button:focus,
     .stMultiSelect:focus-within,
     .stDateInput:focus-within,
@@ -327,12 +228,6 @@ st.markdown("""
         border-color: #e5e7eb;
     }
     
-    /* Warning/Error boxes */
-    .stAlert {
-        border-radius: 8px;
-        border-left: 4px solid;
-    }
-    
     /* Caption styling */
     .caption-text {
         font-size: 13px;
@@ -340,42 +235,40 @@ st.markdown("""
         margin-top: 8px;
     }
     
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 48px 24px;
-        background: #f9fafb;
-        border: 2px dashed #e5e7eb;
-        border-radius: 12px;
-        margin: 24px 0;
+    /* Live indicator badge */
+    .live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: #f0fdf4;
+        border: 1px solid #86efac;
+        border-radius: 20px;
+        font-size: 12px;
+        color: #166534;
+        font-weight: 500;
     }
     
-    .empty-state-icon {
-        font-size: 64px;
-        margin-bottom: 16px;
-        opacity: 0.5;
+    .live-dot {
+        width: 8px;
+        height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
     }
     
-    .empty-state-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #111827;
-        margin-bottom: 8px;
-    }
-    
-    .empty-state-text {
-        font-size: 14px;
-        color: #6b7280;
-        margin-bottom: 24px;
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# ==================== SESSION STATE INITIALIZATION ====================
+# ==================== SESSION STATE ====================
 
 if 'filters' not in st.session_state:
     st.session_state.filters = {
-        'currencies': None,  # Will be set to all on first load
+        'currencies': None,
         'statuses': None,
         'date_range': None,
         'quick_filter': 'All Time'
@@ -391,23 +284,16 @@ if 'last_refresh' not in st.session_state:
 
 @st.cache_resource
 def init_connection():
-    """Inicializa conexión a PostgreSQL con error handling mejorado."""
+    """Inicializa conexión a PostgreSQL."""
     database_url = os.getenv('DATABASE_URL')
     if not database_url:
         st.error("""
         ### ⚠️ Configuration Error
         
-        **DATABASE_URL** not found in environment variables.
-        
-        **To fix this:**
-        1. Create a `.env` file in the project root
-        2. Add your PostgreSQL connection string:
-           ```
-           DATABASE_URL=postgresql://user:password@host:port/database
-           ```
+        **DATABASE_URL** not found. Please:
+        1. Create a `.env` file
+        2. Add: `DATABASE_URL=postgresql://...`
         3. Restart the dashboard
-        
-        **Need help?** [View Documentation](https://github.com/...)
         """)
         st.stop()
     
@@ -420,25 +306,19 @@ def init_connection():
         st.error(f"""
         ### ⚠️ Database Connection Failed
         
-        We couldn't connect to PostgreSQL. Please verify:
+        **Error:** {str(e)}
         
-        1. **Database is running**: Check your Railway/PostgreSQL service
-        2. **Credentials are correct**: Verify DATABASE_URL in `.env`
-        3. **Network access**: Ensure firewall allows connections
-        
-        **Error details:**
-        ```
-        {str(e)}
-        ```
-        
-        **Need help?** Contact support or check the logs.
+        **Solutions:**
+        1. Check database is running
+        2. Verify DATABASE_URL credentials
+        3. Check network/firewall settings
         """)
         st.stop()
 
 
 @st.cache_data(ttl=300)
 def load_data():
-    """Carga y transforma datos con validación mejorada."""
+    """Carga y transforma datos."""
     engine = init_connection()
     
     query = """
@@ -451,41 +331,26 @@ def load_data():
     try:
         df = pd.read_sql(query, engine)
         
-        # Validación de datos vacíos
         if len(df) == 0:
-            return pd.DataFrame()  # Return empty DataFrame
+            return pd.DataFrame()
         
         df['timestamp'] = pd.to_datetime(df['timestamp'])
-        
-        # Vectorización
         df['amount_usd'] = df['amount'] * df['currency'].map(EXCHANGE_RATES).fillna(1.0)
-        
-        # Temporal
         df['date'] = df['timestamp'].dt.date
         df['year_month'] = df['timestamp'].dt.to_period('M').astype(str)
         df['week'] = df['timestamp'].dt.to_period('W').astype(str)
         df['day_of_week'] = df['timestamp'].dt.day_name()
         df['hour'] = df['timestamp'].dt.hour
         
-        # Update last refresh
         st.session_state.last_refresh = datetime.now()
-        
         return df
     except Exception as e:
         st.error(f"""
         ### ⚠️ Data Loading Failed
         
-        We couldn't load data from the database.
+        **Error:** {str(e)}
         
-        **Error details:**
-        ```
-        {str(e)}
-        ```
-        
-        **Possible solutions:**
-        - Check if the `transactions` table exists
-        - Verify data types are correct
-        - Try running the ETL pipeline again: `python3 etl_pipeline.py`
+        Try running: `python3 etl_pipeline.py`
         """)
         st.stop()
 
@@ -511,7 +376,7 @@ def format_number(value):
 
 
 def calculate_delta(df, metric_col='amount_usd', period_col='year_month'):
-    """Calcula delta robusto con manejo de errores."""
+    """Calcula delta robusto."""
     try:
         if len(df) == 0 or period_col not in df.columns:
             return 0
@@ -528,7 +393,7 @@ def calculate_delta(df, metric_col='amount_usd', period_col='year_month'):
 
 
 def get_time_ago(dt):
-    """Convierte datetime a formato 'time ago'."""
+    """Convierte datetime a 'time ago'."""
     now = datetime.now()
     diff = now - dt
     
@@ -543,7 +408,7 @@ def get_time_ago(dt):
 
 
 def apply_quick_filter(df, filter_type):
-    """Aplica filtros rápidos de fecha."""
+    """Aplica filtros rápidos."""
     now = pd.Timestamp.now()
     
     if filter_type == "Last 7 Days":
@@ -560,165 +425,27 @@ def apply_quick_filter(df, filter_type):
         start_date = last_month.replace(day=1).date()
         end_date = last_month.date()
         return df[(df['date'] >= start_date) & (df['date'] <= end_date)]
-    else:  # "All Time"
+    else:
         return df
 
 # ==================== COMPONENTES UI ====================
 
 def render_empty_state():
-    """Renderiza estado vacío cuando no hay datos."""
-    st.markdown("""
-    <div class="empty-state">
-        <div class="empty-state-icon">📊</div>
-        <div class="empty-state-title">No Transactions Found</div>
-        <div class="empty-state-text">
-            The transactions table is empty or no data matches your filters.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    """Estado vacío."""
+    st.warning("""
+    ### 📊 No Transactions Found
     
-    with st.expander("🚀 Get Started"):
-        st.markdown("""
-        **To populate the dashboard with data:**
-        
-        1. **Generate sample data:**
-           ```bash
-           python3 generate_data.py
-           ```
-        
-        2. **Run the ETL pipeline:**
-           ```bash
-           python3 etl_pipeline.py
-           ```
-        
-        3. **Refresh this page**
-        
-        **Need help?** Check the [Documentation](https://github.com/...)
-        """)
-
-
-def render_header(df):
-    """Renderiza header con live status."""
-    col1, col2, col3 = st.columns([3, 2, 1])
+    The transactions table is empty.
     
-    with col1:
-        st.title("Financial Intelligence")
-        st.markdown('<p class="caption-text">Real-time transaction analytics with USD normalization</p>', unsafe_allow_html=True)
-    
-    with col2:
-        # Live status indicator
-        time_ago = get_time_ago(st.session_state.last_refresh)
-        st.markdown(f"""
-        <div class="live-indicator">
-            <div class="live-dot"></div>
-            <span>Live • Updated {time_ago}</span>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        # Help button
-        if st.button("❓ Help", use_container_width=True):
-            st.session_state.show_help = not st.session_state.show_help
-    
-    # Help modal
-    if st.session_state.show_help:
-        st.info("""
-        ### 📖 Quick Guide
-        
-        **Filters:**
-        - Use the sidebar to filter by currency, status, and date
-        - Try Quick Filters for common date ranges
-        - Click "Reset Filters" to start over
-        
-        **Metrics:**
-        - All volumes are normalized to USD using fixed exchange rates
-        - Deltas show month-over-month comparison
-        - Hover over metrics for detailed explanations
-        
-        **Export:**
-        - Download filtered data as CSV from the sidebar
-        
-        **Need more help?** [View Full Documentation](https://github.com/...)
-        """)
-
-
-def render_kpis_hero(df):
-    """Renderiza KPIs con hero metric."""
-    if len(df) == 0:
-        return
-    
-    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-    
-    # HERO KPI: Total Volume (más grande y destacado)
-    volume = df['amount_usd'].sum()
-    delta_vol = calculate_delta(df)
-    
-    with col1:
-        st.markdown('<div class="card-kpi-hero">', unsafe_allow_html=True)
-        st.metric(
-            label="Total Volume",
-            value=format_currency(volume),
-            delta=f"{delta_vol:+.1f}% MoM" if delta_vol != 0 else None,
-            help="💡 Total transaction volume in USD. Uses fixed exchange rates: EUR=1.08, GBP=1.27, COP=0.00025"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # KPI 2: Total Transactions
-    total = len(df)
-    delta_txn = calculate_delta(
-        df.groupby('year_month').size().reset_index(name='count').assign(amount_usd=lambda x: x['count'])
-    )
-    
-    with col2:
-        st.markdown('<div class="card-kpi">', unsafe_allow_html=True)
-        st.metric(
-            label="Transactions",
-            value=format_number(total),
-            delta=f"{delta_txn:+.1f}% MoM" if delta_txn != 0 else None,
-            help="Total number of transactions in the selected period"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # KPI 3: Average Ticket
-    avg = df['amount_usd'].mean()
-    try:
-        periods = sorted(df['year_month'].unique())
-        if len(periods) >= 2:
-            curr_avg = df[df['year_month'] == periods[-1]]['amount_usd'].mean()
-            prev_avg = df[df['year_month'] == periods[-2]]['amount_usd'].mean()
-            delta_avg = ((curr_avg - prev_avg) / prev_avg * 100) if prev_avg > 0 else 0
-        else:
-            delta_avg = 0
-    except:
-        delta_avg = 0
-    
-    with col3:
-        st.markdown('<div class="card-kpi">', unsafe_allow_html=True)
-        st.metric(
-            label="Avg Ticket",
-            value=format_currency(avg),
-            delta=f"{delta_avg:+.1f}% MoM" if delta_avg != 0 else None,
-            help="Average transaction amount (mean) in USD"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # KPI 4: Success Rate
-    completed = len(df[df['status'] == 'COMPLETED'])
-    success_rate = (completed / len(df) * 100) if len(df) > 0 else 0
-    
-    with col4:
-        st.markdown('<div class="card-kpi">', unsafe_allow_html=True)
-        st.metric(
-            label="Success Rate",
-            value=f"{success_rate:.1f}%",
-            delta=f"{completed:,} successful",
-            help="Percentage of completed transactions vs total"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+    **To get started:**
+    1. Run: `python3 generate_data.py`
+    2. Run: `python3 etl_pipeline.py`
+    3. Refresh this page
+    """)
 
 
 def create_trend_area_chart(df):
-    """Gráfico de área con gradiente moderno."""
+    """Gráfico de área con gradiente."""
     daily = df.groupby('date').agg({
         'amount_usd': 'sum',
         'id': 'count'
@@ -726,7 +453,6 @@ def create_trend_area_chart(df):
     
     fig = go.Figure()
     
-    # Area chart con gradiente
     fig.add_trace(go.Scatter(
         x=daily['date'],
         y=daily['amount_usd'],
@@ -756,18 +482,13 @@ def create_trend_area_chart(df):
     )
     
     fig.update_xaxes(showgrid=False, zeroline=False)
-    fig.update_yaxes(
-        showgrid=True, 
-        gridcolor='#f3f4f6', 
-        zeroline=False, 
-        tickformat='$,.0f'
-    )
+    fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
     
     return fig
 
 
 def create_status_donut_chart(df):
-    """Donut chart moderno para distribución de status."""
+    """Donut chart para status."""
     status_data = df.groupby('status').size().reset_index(name='count')
     status_data = status_data.sort_values('count', ascending=False)
     
@@ -811,7 +532,7 @@ def create_status_donut_chart(df):
 
 
 def create_currency_bar_chart(df):
-    """Gráfico de barras con márgenes corregidos."""
+    """Gráfico de barras por moneda."""
     currency_data = df.groupby('currency').agg({
         'amount': 'sum',
         'id': 'count'
@@ -854,81 +575,59 @@ def create_currency_bar_chart(df):
     
     return fig
 
-
-def render_transaction_table_card(df):
-    """Tabla de transacciones en tarjeta."""
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    
-    st.markdown("### Recent Transactions")
-    st.markdown('<p class="caption-text">Last 50 transactions with amounts normalized to USD</p>', unsafe_allow_html=True)
-    
-    display_df = df.head(50).copy()
-    
-    column_config = {
-        "timestamp": st.column_config.DatetimeColumn(
-            "Date/Time",
-            format="MMM DD, YYYY HH:mm",
-            width="medium"
-        ),
-        "amount": st.column_config.NumberColumn(
-            "Amount",
-            format="%.2f",
-            width="small"
-        ),
-        "amount_usd": st.column_config.NumberColumn(
-            "Amount USD",
-            format="$%.2f",
-            width="medium"
-        ),
-        "currency": st.column_config.TextColumn(
-            "Currency",
-            width="small"
-        ),
-        "status": st.column_config.TextColumn(
-            "Status",
-            width="small"
-        ),
-        "client_device": st.column_config.TextColumn(
-            "Device",
-            width="small"
-        )
-    }
-    
-    columns = ['timestamp', 'amount', 'currency', 'amount_usd', 'status', 'client_device']
-    
-    st.dataframe(
-        display_df[columns],
-        column_config=column_config,
-        use_container_width=True,
-        height=400,
-        hide_index=True
-    )
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
 # ==================== MAIN ====================
 
 def main():
-    """Aplicación principal con UX mejorado."""
+    """Aplicación principal."""
     
     # Cargar datos
     with st.spinner("Loading data..."):
         df = load_data()
     
-    # Empty state
     if len(df) == 0:
         render_empty_state()
         return
     
-    # ==================== SIDEBAR CON MEJORAS UX ====================
+    # ==================== HEADER ====================
+    
+    col1, col2, col3 = st.columns([5, 3, 2])
+    
+    with col1:
+        st.title("Financial Intelligence")
+        st.caption("Real-time transaction analytics with USD normalization")
+    
+    with col2:
+        time_ago = get_time_ago(st.session_state.last_refresh)
+        st.markdown(f"""
+        <div class="live-badge">
+            <div class="live-dot"></div>
+            <span>Live • Updated {time_ago}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        if st.button("❓ Help", use_container_width=True):
+            st.session_state.show_help = not st.session_state.show_help
+    
+    if st.session_state.show_help:
+        st.info("""
+        **Quick Guide:**
+        - Use sidebar filters to explore data
+        - All volumes normalized to USD
+        - Export data with CSV button
+        - Reset filters anytime
+        """)
+    
+    st.divider()
+    
+    # ==================== SIDEBAR ====================
     
     st.sidebar.markdown("### Filters")
     
-    # Quick Filters y Reset en fila
     col1, col2 = st.sidebar.columns(2)
     
     with col1:
-        if st.button("🔄 Reset", use_container_width=True, help="Clear all filters"):
+        if st.button("🔄 Reset", use_container_width=True):
             st.session_state.filters = {
                 'currencies': None,
                 'statuses': None,
@@ -941,19 +640,14 @@ def main():
         quick_filter = st.selectbox(
             "Quick",
             ["All Time", "Last 7 Days", "Last 30 Days", "This Month", "Last Month"],
-            index=["All Time", "Last 7 Days", "Last 30 Days", "This Month", "Last Month"].index(
-                st.session_state.filters.get('quick_filter', 'All Time')
-            ),
-            help="Quick date range filters"
+            index=0
         )
-        st.session_state.filters['quick_filter'] = quick_filter
     
-    st.sidebar.markdown("---")
+    st.sidebar.divider()
     
-    # Currency filter con flags
+    # Currency filter
     all_currencies = sorted(df['currency'].unique())
     
-    # Initialize default if not set
     if st.session_state.filters['currencies'] is None:
         st.session_state.filters['currencies'] = all_currencies
     
@@ -961,16 +655,12 @@ def main():
         "Currency",
         options=all_currencies,
         default=st.session_state.filters['currencies'],
-        format_func=lambda x: CURRENCY_DISPLAY.get(x, x),
-        help="Filter by transaction currency"
+        format_func=lambda x: CURRENCY_DISPLAY.get(x, x)
     )
     
-    # Validación: al menos una moneda
     if len(selected_currencies) == 0:
-        st.sidebar.error("⚠️ Please select at least one currency")
+        st.sidebar.error("⚠️ Select at least one currency")
         selected_currencies = all_currencies
-    
-    st.session_state.filters['currencies'] = selected_currencies
     
     # Status filter
     all_statuses = sorted(df['status'].unique())
@@ -981,38 +671,32 @@ def main():
     selected_statuses = st.sidebar.multiselect(
         "Status",
         options=all_statuses,
-        default=st.session_state.filters['statuses'],
-        help="Filter by transaction status"
+        default=st.session_state.filters['statuses']
     )
     
     if len(selected_statuses) == 0:
-        st.sidebar.error("⚠️ Please select at least one status")
+        st.sidebar.error("⚠️ Select at least one status")
         selected_statuses = all_statuses
     
-    st.session_state.filters['statuses'] = selected_statuses
+    st.sidebar.divider()
     
-    st.sidebar.markdown("---")
-    
-    # Date range filter
+    # Date range
     date_range = st.sidebar.date_input(
         "Date Range",
         value=(df['timestamp'].min().date(), df['timestamp'].max().date()),
         min_value=df['timestamp'].min().date(),
-        max_value=df['timestamp'].max().date(),
-        help="Filter by date range"
+        max_value=df['timestamp'].max().date()
     )
     
-    st.sidebar.markdown("---")
+    st.sidebar.divider()
     
     # ==================== APLICAR FILTROS ====================
     
     df_filtered = df.copy()
     
-    # Apply quick filter first
     if quick_filter != "All Time":
         df_filtered = apply_quick_filter(df_filtered, quick_filter)
     
-    # Then apply manual filters
     if selected_currencies:
         df_filtered = df_filtered[df_filtered['currency'].isin(selected_currencies)]
     
@@ -1026,40 +710,35 @@ def main():
             (df_filtered['timestamp'].dt.date <= end)
         ]
     
-    # Mostrar resumen de filtros
-    st.sidebar.markdown("---")
     st.sidebar.metric("Filtered Records", format_number(len(df_filtered)))
-    st.sidebar.caption(f"Total available: {format_number(len(df))}")
+    st.sidebar.caption(f"Total: {format_number(len(df))}")
     
-    # Export button
-    st.sidebar.markdown("---")
+    st.sidebar.divider()
+    
+    # Export
     csv = df_filtered.to_csv(index=False)
     st.sidebar.download_button(
-        label="📥 Export to CSV",
+        label="📥 Export CSV",
         data=csv,
         file_name=f"transactions_{datetime.now().strftime('%Y%m%d')}.csv",
         mime="text/csv",
         use_container_width=True
     )
     
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("**Exchange Rates**")
+    st.sidebar.divider()
+    st.sidebar.caption("**Exchange Rates**")
     st.sidebar.caption("USD: 1.00 | EUR: 1.08")
     st.sidebar.caption("GBP: 1.27 | COP: 0.00025")
     
-    # ==================== VALIDACIÓN DE DATOS FILTRADOS ====================
+    # ==================== VALIDACIÓN ====================
     
     if len(df_filtered) == 0:
         st.warning("""
         ### ⚠️ No Data Matches Your Filters
         
-        Try adjusting:
-        - **Date range**: Select a wider period
-        - **Currency**: Include more currencies
-        - **Status**: Select different statuses
+        Try adjusting your date range, currency, or status filters.
         """)
-        
-        if st.button("🔄 Reset All Filters", type="primary"):
+        if st.button("🔄 Reset All Filters"):
             st.session_state.filters = {
                 'currencies': all_currencies,
                 'statuses': all_statuses,
@@ -1067,14 +746,7 @@ def main():
                 'quick_filter': 'All Time'
             }
             st.rerun()
-        
         return
-    
-    # ==================== HEADER ====================
-    
-    render_header(df_filtered)
-    
-    st.markdown("---")
     
     # ==================== TABS ====================
     
@@ -1082,33 +754,86 @@ def main():
     
     # TAB 1: OVERVIEW
     with tab1:
-        # Fila 1: KPIs con Hero metric
-        render_kpis_hero(df_filtered)
+        # KPIs Row
+        col1, col2, col3, col4 = st.columns(4)
+        
+        # KPI 1: Total Volume
+        volume = df_filtered['amount_usd'].sum()
+        delta_vol = calculate_delta(df_filtered)
+        
+        with col1:
+            st.metric(
+                label="Total Volume",
+                value=format_currency(volume),
+                delta=f"{delta_vol:+.1f}% MoM" if delta_vol != 0 else None,
+                help="Total transaction volume in USD"
+            )
+        
+        # KPI 2: Transactions
+        total = len(df_filtered)
+        delta_txn = calculate_delta(
+            df_filtered.groupby('year_month').size().reset_index(name='count').assign(amount_usd=lambda x: x['count'])
+        )
+        
+        with col2:
+            st.metric(
+                label="Transactions",
+                value=format_number(total),
+                delta=f"{delta_txn:+.1f}% MoM" if delta_txn != 0 else None,
+                help="Total number of transactions"
+            )
+        
+        # KPI 3: Avg Ticket
+        avg = df_filtered['amount_usd'].mean()
+        try:
+            periods = sorted(df_filtered['year_month'].unique())
+            if len(periods) >= 2:
+                curr_avg = df_filtered[df_filtered['year_month'] == periods[-1]]['amount_usd'].mean()
+                prev_avg = df_filtered[df_filtered['year_month'] == periods[-2]]['amount_usd'].mean()
+                delta_avg = ((curr_avg - prev_avg) / prev_avg * 100) if prev_avg > 0 else 0
+            else:
+                delta_avg = 0
+        except:
+            delta_avg = 0
+        
+        with col3:
+            st.metric(
+                label="Avg Ticket",
+                value=format_currency(avg),
+                delta=f"{delta_avg:+.1f}% MoM" if delta_avg != 0 else None,
+                help="Average transaction amount"
+            )
+        
+        # KPI 4: Success Rate
+        completed = len(df_filtered[df_filtered['status'] == 'COMPLETED'])
+        success_rate = (completed / len(df_filtered) * 100) if len(df_filtered) > 0 else 0
+        
+        with col4:
+            st.metric(
+                label="Success Rate",
+                value=f"{success_rate:.1f}%",
+                delta=f"{completed:,} successful",
+                help="Percentage of completed transactions"
+            )
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Fila 2: Gráficos principales en Cards (2/3 y 1/3)
+        # Charts Row
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.plotly_chart(create_trend_area_chart(df_filtered), use_container_width=True, key='trend_overview')
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.plotly_chart(create_trend_area_chart(df_filtered), use_container_width=True)
         
         with col2:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.plotly_chart(create_status_donut_chart(df_filtered), use_container_width=True, key='donut_overview')
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.plotly_chart(create_status_donut_chart(df_filtered), use_container_width=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Fila 3: Stats adicionales en Cards
-        st.markdown('<div class="card">', unsafe_allow_html=True)
+        # Stats Row
         st.markdown("### Key Statistics")
         
         col1, col2, col3, col4 = st.columns(4)
         
-        # Filtrar valores > 0 para max/min
         valid_amounts = df_filtered[df_filtered['amount_usd'] > 0]['amount_usd']
         
         with col1:
@@ -1126,23 +851,15 @@ def main():
         with col4:
             mobile_pct = len(df_filtered[df_filtered['client_device'] == 'mobile']) / len(df_filtered) * 100
             st.metric("Mobile Share", f"{mobile_pct:.1f}%")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
     
     # TAB 2: ANALYSIS
     with tab2:
-        # Gráficos de análisis en Cards
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.plotly_chart(create_currency_bar_chart(df_filtered), use_container_width=True, key='currency_analysis')
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.plotly_chart(create_currency_bar_chart(df_filtered), use_container_width=True)
         
         with col2:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            
-            # Device analysis
             device_data = df_filtered.groupby('client_device').agg({
                 'amount_usd': 'sum'
             }).reset_index()
@@ -1176,13 +893,10 @@ def main():
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
             
-            st.plotly_chart(fig, use_container_width=True, key='device_analysis')
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.plotly_chart(fig, use_container_width=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Status breakdown table en Card
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("### Status Breakdown")
         
         status_summary = df_filtered.groupby('status').agg({
@@ -1195,18 +909,59 @@ def main():
         status_summary['Count'] = status_summary['Count'].apply(format_number)
         
         st.dataframe(status_summary, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
     
     # TAB 3: TRANSACTIONS
     with tab3:
-        render_transaction_table_card(df_filtered)
+        st.markdown("### Recent Transactions")
+        st.caption("Last 50 transactions with amounts normalized to USD")
+        
+        display_df = df_filtered.head(50).copy()
+        
+        column_config = {
+            "timestamp": st.column_config.DatetimeColumn(
+                "Date/Time",
+                format="MMM DD, YYYY HH:mm",
+                width="medium"
+            ),
+            "amount": st.column_config.NumberColumn(
+                "Amount",
+                format="%.2f",
+                width="small"
+            ),
+            "amount_usd": st.column_config.NumberColumn(
+                "Amount USD",
+                format="$%.2f",
+                width="medium"
+            ),
+            "currency": st.column_config.TextColumn(
+                "Currency",
+                width="small"
+            ),
+            "status": st.column_config.TextColumn(
+                "Status",
+                width="small"
+            ),
+            "client_device": st.column_config.TextColumn(
+                "Device",
+                width="small"
+            )
+        }
+        
+        columns = ['timestamp', 'amount', 'currency', 'amount_usd', 'status', 'client_device']
+        
+        st.dataframe(
+            display_df[columns],
+            column_config=column_config,
+            use_container_width=True,
+            height=400,
+            hide_index=True
+        )
     
     # Footer
-    st.markdown("---")
-    st.markdown(
-        f'<p class="caption-text" style="text-align: center;">v6.0 UX Enhanced Edition | '
-        f'PostgreSQL on Railway | Last updated: {st.session_state.last_refresh.strftime("%Y-%m-%d %H:%M:%S")}</p>',
-        unsafe_allow_html=True
+    st.divider()
+    st.caption(
+        f"v6.1 Layout Fixed | PostgreSQL on Railway | "
+        f"Last updated: {st.session_state.last_refresh.strftime('%Y-%m-%d %H:%M:%S')}"
     )
 
 
