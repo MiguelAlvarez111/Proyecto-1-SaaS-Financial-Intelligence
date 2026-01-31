@@ -272,18 +272,26 @@ def render_kpis_with_deltas(df):
     """
     st.subheader("📊 Métricas Principales (Todas en USD)")
     
+    # Validar que hay datos
+    if len(df) == 0:
+        st.warning("⚠️ No hay datos para mostrar métricas")
+        return
+    
     col1, col2, col3, col4 = st.columns(4)
     
     # KPI 1: Total Transacciones
     total_transactions = len(df)
     # Calcular delta de transacciones
-    current_month_txns = len(df[df['year_month'] == df['year_month'].max()])
-    months = df['year_month'].unique()
-    if len(months) > 1:
-        prev_month = sorted(months)[-2]
-        prev_month_txns = len(df[df['year_month'] == prev_month])
-        txn_delta = ((current_month_txns - prev_month_txns) / prev_month_txns * 100) if prev_month_txns > 0 else 0
-    else:
+    try:
+        current_month_txns = len(df[df['year_month'] == df['year_month'].max()])
+        months = df['year_month'].unique()
+        if len(months) > 1:
+            prev_month = sorted(months)[-2]
+            prev_month_txns = len(df[df['year_month'] == prev_month])
+            txn_delta = ((current_month_txns - prev_month_txns) / prev_month_txns * 100) if prev_month_txns > 0 else 0
+        else:
+            txn_delta = 0
+    except:
         txn_delta = 0
     
     with col1:
@@ -296,7 +304,10 @@ def render_kpis_with_deltas(df):
     
     # KPI 2: Volumen Total (USD normalizado)
     total_volume_usd = df['amount_usd'].sum()
-    volume_comparison = calculate_period_comparison(df, 'month')
+    try:
+        volume_comparison = calculate_period_comparison(df, 'month')
+    except:
+        volume_comparison = {'current': total_volume_usd, 'previous': 0, 'delta': 0}
     
     with col2:
         st.metric(
@@ -308,16 +319,26 @@ def render_kpis_with_deltas(df):
     
     # KPI 3: Ticket Promedio (USD)
     avg_ticket_usd = df['amount_usd'].mean()
-    avg_comparison = calculate_period_comparison(
-        df.groupby('date')['amount_usd'].mean().reset_index().rename(columns={'amount_usd': 'amount_usd'}),
-        'month'
-    )
+    
+    # Calcular delta de ticket promedio comparando meses
+    try:
+        current_month = df['year_month'].max()
+        current_month_avg = df[df['year_month'] == current_month]['amount_usd'].mean()
+        months = sorted(df['year_month'].unique())
+        if len(months) > 1:
+            prev_month = months[-2]
+            prev_month_avg = df[df['year_month'] == prev_month]['amount_usd'].mean()
+            avg_delta = ((current_month_avg - prev_month_avg) / prev_month_avg * 100) if prev_month_avg > 0 else 0
+        else:
+            avg_delta = 0
+    except:
+        avg_delta = 0
     
     with col3:
         st.metric(
             label="🎯 Ticket Promedio (USD)",
             value=format_currency_usd(avg_ticket_usd),
-            delta=f"{avg_comparison['delta']:+.1f}% vs mes anterior",
+            delta=f"{avg_delta:+.1f}% vs mes anterior",
             help="Promedio por transacción en USD"
         )
     
