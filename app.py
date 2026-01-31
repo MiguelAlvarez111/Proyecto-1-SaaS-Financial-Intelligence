@@ -147,14 +147,124 @@ st.markdown("""
     
     /* Sidebar moderna */
     [data-testid="stSidebar"] {
-        background-color: #ffffff;
+        background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
         border-right: 1px solid #e5e7eb;
     }
     
     [data-testid="stSidebar"] h3 {
         color: #111827;
-        font-size: 16px;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        margin-top: 20px;
+    }
+    
+    /* Sidebar section dividers */
+    [data-testid="stSidebar"] hr {
+        margin: 24px 0;
+        border: none;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    /* Sidebar filter labels */
+    [data-testid="stSidebar"] label {
+        font-size: 12px;
         font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    
+    /* Sidebar buttons styling */
+    [data-testid="stSidebar"] .stButton>button {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    [data-testid="stSidebar"] .stButton>button:hover {
+        background-color: #f9fafb;
+        border-color: #d1d5db;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Sidebar multiselect styling */
+    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+    }
+    
+    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="tag"] {
+        background-color: #6366f1;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 8px;
+    }
+    
+    /* Sidebar selectbox styling */
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+    
+    /* Sidebar date input styling */
+    [data-testid="stSidebar"] .stDateInput input {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+    
+    /* Sidebar metric styling */
+    [data-testid="stSidebar"] [data-testid="stMetricValue"] {
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        color: #6366f1 !important;
+    }
+    
+    [data-testid="stSidebar"] [data-testid="stMetricLabel"] {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #6b7280 !important;
+        text-transform: uppercase !important;
+    }
+    
+    /* Sidebar download button */
+    [data-testid="stSidebar"] .stDownloadButton>button {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+        transition: all 0.2s ease;
+    }
+    
+    [data-testid="stSidebar"] .stDownloadButton>button:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+    }
+    
+    /* Quick filters container */
+    .quick-filters-container {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
         margin-bottom: 16px;
     }
     
@@ -630,12 +740,14 @@ def main():
     
     # ==================== SIDEBAR ====================
     
-    st.sidebar.markdown("### Filters")
+    st.sidebar.markdown("### 🔍 Filters")
     
-    col1, col2 = st.sidebar.columns(2)
+    # Quick Actions Row
+    st.sidebar.markdown("**Quick Actions**")
+    col1, col2 = st.sidebar.columns([1, 1])
     
     with col1:
-        if st.button("🔄 Reset", use_container_width=True):
+        if st.button("🔄 Reset All", use_container_width=True, key="reset_btn"):
             st.session_state.filters = {
                 'currencies': None,
                 'statuses': None,
@@ -645,41 +757,54 @@ def main():
             st.rerun()
     
     with col2:
-        quick_filter = st.selectbox(
-            "Quick",
-            ["All Time", "Last 7 Days", "Last 30 Days", "This Month", "Last Month"],
-            index=0
-        )
+        if st.button("📊 Apply", use_container_width=True, key="apply_btn", type="primary"):
+            pass  # Filters apply automatically
+    
+    st.sidebar.markdown("")  # Small spacing
+    
+    # Quick Date Filters
+    quick_filter = st.sidebar.selectbox(
+        "📅 Time Period",
+        ["All Time", "Last 7 Days", "Last 30 Days", "This Month", "Last Month"],
+        index=0,
+        label_visibility="visible"
+    )
     
     st.sidebar.divider()
     
-    # Currency filter
+    # Currency filter section
+    st.sidebar.markdown("**💱 Currency**")
     all_currencies = sorted(df['currency'].unique())
     
     if st.session_state.filters['currencies'] is None:
         st.session_state.filters['currencies'] = all_currencies
     
     selected_currencies = st.sidebar.multiselect(
-        "Currency",
+        "Select currencies to analyze",
         options=all_currencies,
         default=st.session_state.filters['currencies'],
-        format_func=lambda x: CURRENCY_DISPLAY.get(x, x)
+        format_func=lambda x: CURRENCY_DISPLAY.get(x, x),
+        label_visibility="collapsed"
     )
     
     if len(selected_currencies) == 0:
         st.sidebar.error("⚠️ Select at least one currency")
         selected_currencies = all_currencies
     
-    # Status filter
+    st.sidebar.markdown("")  # Small spacing
+    
+    # Status filter section
+    st.sidebar.markdown("**📌 Transaction Status**")
     all_statuses = sorted(df['status'].unique())
     
     if st.session_state.filters['statuses'] is None:
         st.session_state.filters['statuses'] = all_statuses
     
     selected_statuses = st.sidebar.multiselect(
-        "Status",
+        "Select status to filter",
         options=all_statuses,
-        default=st.session_state.filters['statuses']
+        default=st.session_state.filters['statuses'],
+        label_visibility="collapsed"
     )
     
     if len(selected_statuses) == 0:
@@ -688,12 +813,14 @@ def main():
     
     st.sidebar.divider()
     
-    # Date range
+    # Date range section
+    st.sidebar.markdown("**📆 Date Range**")
     date_range = st.sidebar.date_input(
-        "Date Range",
+        "Select date range",
         value=(df['timestamp'].min().date(), df['timestamp'].max().date()),
         min_value=df['timestamp'].min().date(),
-        max_value=df['timestamp'].max().date()
+        max_value=df['timestamp'].max().date(),
+        label_visibility="collapsed"
     )
     
     st.sidebar.divider()
@@ -718,25 +845,36 @@ def main():
             (df_filtered['timestamp'].dt.date <= end)
         ]
     
-    st.sidebar.metric("Filtered Records", format_number(len(df_filtered)))
-    st.sidebar.caption(f"Total: {format_number(len(df))}")
-    
-    st.sidebar.divider()
-    
-    # Export
-    csv = df_filtered.to_csv(index=False)
-    st.sidebar.download_button(
-        label="📥 Export CSV",
-        data=csv,
-        file_name=f"transactions_{datetime.now().strftime('%Y%m%d')}.csv",
-        mime="text/csv",
-        use_container_width=True
+    # Results section
+    st.sidebar.markdown("**📊 Results**")
+    st.sidebar.metric(
+        "Filtered Records", 
+        format_number(len(df_filtered)),
+        delta=f"of {format_number(len(df))} total"
     )
     
     st.sidebar.divider()
-    st.sidebar.caption("**Exchange Rates**")
-    st.sidebar.caption("USD: 1.00 | EUR: 1.08")
-    st.sidebar.caption("GBP: 1.27 | COP: 0.00025")
+    
+    # Export section
+    st.sidebar.markdown("**💾 Export Data**")
+    csv = df_filtered.to_csv(index=False)
+    st.sidebar.download_button(
+        label="📥 Download CSV",
+        data=csv,
+        file_name=f"transactions_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        mime="text/csv",
+        use_container_width=True,
+        help="Download filtered data as CSV file"
+    )
+    
+    st.sidebar.divider()
+    
+    # Info section
+    st.sidebar.markdown("**ℹ️ Exchange Rates**")
+    st.sidebar.caption("🇺🇸 USD: 1.00")
+    st.sidebar.caption("🇪🇺 EUR: 1.08")
+    st.sidebar.caption("🇬🇧 GBP: 1.27")
+    st.sidebar.caption("🇨🇴 COP: 0.00025")
     
     # ==================== VALIDACIÓN ====================
     
