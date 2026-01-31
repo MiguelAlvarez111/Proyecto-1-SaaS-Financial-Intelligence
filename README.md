@@ -180,6 +180,70 @@ El pipeline mostrará:
 
 ---
 
-## 👨‍💻 Autor
+## 📊 Dashboard Interactivo (Streamlit)
 
-Senior Data Engineer
+### Dashboard de Business Intelligence
+
+El archivo `app.py` contiene un dashboard interactivo completo construido con Streamlit y Plotly.
+
+### 🎯 Características del Dashboard
+
+**📈 Visualizaciones:**
+- KPIs principales (Total transacciones, Volumen total, Ticket promedio)
+- Gráfico de barras: Volumen de ventas por moneda
+- Gráfico de línea: Tendencia de transacciones en el tiempo
+- Gráfico donut: Distribución de status (COMPLETED, FAILED, etc.)
+- Gráfico de barras: Transacciones por dispositivo
+- Tabla interactiva con las últimas 100 transacciones
+
+**🔍 Filtros Interactivos:**
+- Multiselect de Monedas (USD, EUR, GBP, COP)
+- Multiselect de Status (COMPLETED, FAILED, PENDING, REFUNDED)
+- Selector de rango de fechas
+- Todos los gráficos reaccionan a los filtros en tiempo real
+
+**⚡ Optimización:**
+- Cache de datos con `@st.cache_data` (TTL: 5 minutos)
+- Cache de conexión con `@st.cache_resource`
+- Layout wide para máxima utilización de pantalla
+
+### 📋 Instalación de Dependencias
+
+```bash
+pip3 install streamlit plotly
+```
+
+O instala todas las dependencias:
+
+```bash
+pip3 install -r requirements.txt
+```
+
+### 💻 Ejecución del Dashboard
+
+**Opción 1: Usando el script de inicio**
+```bash
+./run_dashboard.sh
+```
+
+**Opción 2: Comando directo**
+```bash
+streamlit run app.py
+```
+
+El dashboard se abrirá automáticamente en tu navegador en: **http://localhost:8501**
+
+### 🎨 Características Técnicas
+
+- **Framework**: Streamlit 1.31.0
+- **Gráficos**: Plotly Express & Plotly Graph Objects
+- **Datos**: PostgreSQL vía SQLAlchemy
+- **Estilo**: CSS personalizado con diseño moderno
+- **Responsive**: Layout adaptable (wide mode)
+
+---
+
+## 👨‍💻 Autores
+
+- **Data Engineer**: Generación y ETL de datos
+- **BI Developer**: Dashboard y visualizaciones
