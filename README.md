@@ -180,32 +180,43 @@ El pipeline mostrará:
 
 ---
 
-## 📊 Dashboard Interactivo (Streamlit)
+## 📊 Dashboard Interactivo v2.0 (Streamlit)
 
-### Dashboard de Business Intelligence
+### Dashboard Profesional de Business Intelligence
 
-El archivo `app.py` contiene un dashboard interactivo completo construido con Streamlit y Plotly.
+El archivo `app.py` contiene un dashboard interactivo profesional con arquitectura mejorada, normalización de monedas y UI/UX de nivel empresarial.
 
-### 🎯 Características del Dashboard
+### 🎯 Características del Dashboard v2.0
+
+**✨ NUEVAS MEJORAS:**
+- **💱 Normalización de Monedas**: Todos los KPIs globales usan USD normalizado con tasas fijas
+- **📊 KPIs con Deltas**: Comparación automática vs período anterior (+/-% change)
+- **🎨 Estructura con Tabs**: Navegación organizada en 3 secciones
+- **📋 Tabla Avanzada**: Column config con formato profesional
+- **🎨 Colores Consistentes**: Paleta unificada en todas las visualizaciones
 
 **📈 Visualizaciones:**
-- KPIs principales (Total transacciones, Volumen total, Ticket promedio)
-- Gráfico de barras: Volumen de ventas por moneda
-- Gráfico de línea: Tendencia de transacciones en el tiempo
-- Gráfico donut: Distribución de status (COMPLETED, FAILED, etc.)
-- Gráfico de barras: Transacciones por dispositivo
-- Tabla interactiva con las últimas 100 transacciones
+- KPIs principales con deltas comparativos (mes actual vs anterior)
+- Gráfico de tendencia temporal con doble eje Y
+- Gráfico donut de distribución de status
+- Gráfico de barras: Volumen por moneda (en moneda original)
+- Gráfico de barras: Volumen por dispositivo (normalizado USD)
+- Heatmap: Transacciones por día y hora
+- Tabla interactiva avanzada con últimas 100 transacciones
 
 **🔍 Filtros Interactivos:**
 - Multiselect de Monedas (USD, EUR, GBP, COP)
 - Multiselect de Status (COMPLETED, FAILED, PENDING, REFUNDED)
 - Selector de rango de fechas
-- Todos los gráficos reaccionan a los filtros en tiempo real
+- Todos los gráficos reaccionan en tiempo real
 
-**⚡ Optimización:**
-- Cache de datos con `@st.cache_data` (TTL: 5 minutos)
-- Cache de conexión con `@st.cache_resource`
-- Layout wide para máxima utilización de pantalla
+**⚡ Optimización y UX:**
+- Cache optimizado (@st.cache_data con TTL 5min)
+- Cache de conexión (@st.cache_resource)
+- Layout wide para máxima visualización
+- CSS personalizado con gradientes y sombras
+- Tabs para mejor organización del contenido
+- Descarga de datos en CSV
 
 ### 📋 Instalación de Dependencias
 
