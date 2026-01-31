@@ -10,7 +10,11 @@ import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
-load_dotenv()
+# Cargar .env desde la raíz del proyecto
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_SCRIPT_DIR)
+load_dotenv(os.path.join(_PROJECT_ROOT, ".env"))
+
 
 def verify_data():
     """Verifica los datos en PostgreSQL."""
@@ -19,6 +23,7 @@ def verify_data():
     
     if not DATABASE_URL:
         print("❌ Error: DATABASE_URL no configurado")
+        print("   Configura DATABASE_URL en el archivo .env (raíz del proyecto)")
         return
     
     print("\n" + "="*70)

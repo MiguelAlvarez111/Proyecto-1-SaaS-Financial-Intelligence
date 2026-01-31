@@ -6,9 +6,20 @@ Author: Senior Data Engineer
 Date: 2026-01-31
 """
 
+import os
+import sys
+
+# Permitir importar etl_pipeline desde esta carpeta al ejecutar desde la raíz
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import json
 import pandas as pd
 from etl_pipeline import ETLPipeline
+
+# Ruta al JSON en la raíz del proyecto
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_SCRIPT_DIR)
+RAW_JSON = os.path.join(_PROJECT_ROOT, "raw_transactions.json")
 
 
 def test_transformations():
@@ -19,7 +30,7 @@ def test_transformations():
     print("="*70)
     
     # Crear instancia del pipeline (sin conectar a DB)
-    pipeline = ETLPipeline('raw_transactions.json', 'dummy_url')
+    pipeline = ETLPipeline(RAW_JSON, 'dummy_url')
     
     # 1. Cargar JSON
     df = pipeline.load_json()
@@ -101,8 +112,8 @@ def test_transformations():
     print(f"  • Monto promedio: ${df_clean['amount'].mean():.2f}")
     print(f"  • Monto total: ${df_clean['amount'].sum():,.2f}")
     
-    # 6. Guardar sample transformado
-    sample_output = 'transformed_sample.json'
+    # 6. Guardar sample transformado (en raíz del proyecto)
+    sample_output = os.path.join(_PROJECT_ROOT, 'transformed_sample.json')
     df_clean.head(100).to_json(sample_output, orient='records', indent=2, date_format='iso')
     print(f"\n💾 Muestra transformada guardada en: {sample_output}")
     

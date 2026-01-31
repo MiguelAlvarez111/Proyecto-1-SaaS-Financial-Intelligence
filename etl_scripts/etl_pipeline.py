@@ -27,8 +27,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.types import TIMESTAMP, NUMERIC, VARCHAR
 
-# Configuración
-load_dotenv()
+# Cargar .env desde la raíz del proyecto
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_SCRIPT_DIR)
+load_dotenv(os.path.join(_PROJECT_ROOT, ".env"))
 
 
 class ETLPipeline:
@@ -479,14 +481,14 @@ class ETLPipeline:
 
 def main():
     """Función principal."""
-    # Configuración
-    INPUT_FILE = 'raw_transactions.json'
+    # Ruta al JSON en la raíz del proyecto
+    INPUT_FILE = os.path.join(_PROJECT_ROOT, "raw_transactions.json")
     DATABASE_URL = os.getenv('DATABASE_URL')
     
     # Validar que existe la variable de entorno
     if not DATABASE_URL:
         print("❌ Error: Variable de entorno DATABASE_URL no configurada")
-        print("   Por favor, configura DATABASE_URL en el archivo .env")
+        print("   Por favor, configura DATABASE_URL en el archivo .env (raíz del proyecto)")
         return
     
     # Ejecutar pipeline

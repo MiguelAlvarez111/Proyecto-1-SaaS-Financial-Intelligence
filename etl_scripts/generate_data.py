@@ -7,6 +7,7 @@ Date: 2026-01-31
 """
 
 import json
+import os
 import random
 import uuid
 from datetime import datetime, timedelta
@@ -279,7 +280,9 @@ def print_summary(stats: Dict[str, Any], output_file: str):
 
 def main():
     """Función principal del script."""
-    output_file = "raw_transactions.json"
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    _project_root = os.path.dirname(_script_dir)
+    output_file = os.path.join(_project_root, "raw_transactions.json")
     
     print("\n" + "="*70)
     print("🚀 GENERADOR DE DATOS FINANCIEROS - SaaS Testing")
@@ -288,7 +291,7 @@ def main():
     # Generar dataset
     transactions = generate_dataset(NUM_RECORDS)
     
-    # Guardar a JSON
+    # Guardar a JSON (en la raíz del proyecto)
     print(f"\n💾 Guardando datos en {output_file}...")
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(transactions, f, ensure_ascii=False, indent=2)
