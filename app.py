@@ -648,7 +648,7 @@ def render_advanced_table(df):
     st.dataframe(
         display_df[columns_show],
         column_config=column_config,
-        width=None,  # Actualizado de use_container_width
+        use_container_width=True,
         height=500,
         hide_index=True
     )
@@ -762,10 +762,10 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.plotly_chart(create_trend_chart(df_filtered), width='stretch')
+            st.plotly_chart(create_trend_chart(df_filtered), use_container_width=True)
         
         with col2:
-            st.plotly_chart(create_status_donut(df_filtered), width='stretch')
+            st.plotly_chart(create_status_donut(df_filtered), use_container_width=True)
         
         # Stats adicionales
         st.markdown("---")
@@ -794,13 +794,13 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.plotly_chart(create_currency_chart(df_filtered), width='stretch')
+            st.plotly_chart(create_currency_chart(df_filtered), use_container_width=True)
         
         with col2:
-            st.plotly_chart(create_device_chart(df_filtered), width='stretch')
+            st.plotly_chart(create_device_chart(df_filtered), use_container_width=True)
         
         st.markdown("---")
-        st.plotly_chart(create_heatmap(df_filtered), width='stretch')
+        st.plotly_chart(create_heatmap(df_filtered), use_container_width=True)
         
         st.markdown("---")
         st.subheader("📊 Resumen por Estado")
@@ -812,7 +812,7 @@ def main():
         status_summary['Volumen Total USD'] = status_summary['Volumen Total USD'].apply(format_currency_usd)
         status_summary['Promedio USD'] = status_summary['Promedio USD'].apply(format_currency_usd)
         
-        st.dataframe(status_summary, width=None)
+        st.dataframe(status_summary, use_container_width=True)
     
     # TAB 3: DATOS
     with tab3:
