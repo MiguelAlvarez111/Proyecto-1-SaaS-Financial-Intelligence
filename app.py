@@ -1,15 +1,16 @@
 """
-Financial Intelligence Dashboard v4.0 - Enterprise Edition
-Professional minimalist design for financial analytics.
+Financial Intelligence Dashboard v5.0 - Modern SaaS Card UI
+Professional card-based layout with gradient charts and polished design.
 
-Design Principles:
-- Zero emojis, pure data focus
-- Monochromatic palette with single accent color
-- High data density, minimal spacing
-- System fonts, tabular numerals
-- Excel/Stripe-inspired table layouts
+Design Features:
+- Card-based architecture (all components in white cards)
+- Modern area charts with gradients
+- Donut charts for distributions
+- Fixed visual bugs (alignment, labels, data filtering)
+- Light gray background with white cards
+- Soft shadows and rounded corners
 
-Author: Senior Frontend Engineer (Fintech Specialist)
+Author: Product Designer (Streamlit + CSS Specialist)
 Date: 2026-01-31
 """
 
@@ -36,7 +37,6 @@ load_dotenv()
 
 # ==================== CONSTANTES ====================
 
-# Tasas de cambio (base USD)
 EXCHANGE_RATES = {
     'USD': 1.0,
     'EUR': 1.08,
@@ -44,167 +44,201 @@ EXCHANGE_RATES = {
     'COP': 0.00025
 }
 
-# Colores enterprise (minimalista)
-COLOR_PRIMARY = '#0f172a'      # Slate 900
-COLOR_ACCENT = '#3b82f6'       # Blue 500
+# Modern color palette
+COLOR_PRIMARY = '#6366f1'      # Indigo 500
 COLOR_SUCCESS = '#10b981'      # Green 500
 COLOR_WARNING = '#f59e0b'      # Amber 500
 COLOR_DANGER = '#ef4444'       # Red 500
+COLOR_INFO = '#3b82f6'         # Blue 500
 COLOR_GRAY = '#6b7280'         # Gray 500
-COLOR_LIGHT_GRAY = '#e5e7eb'   # Gray 200
 
-# Status colors (minimalista)
 STATUS_COLORS = {
     'COMPLETED': COLOR_SUCCESS,
     'FAILED': COLOR_DANGER,
     'PENDING': COLOR_WARNING,
-    'REFUNDED': COLOR_GRAY
+    'REFUNDED': COLOR_INFO
 }
 
-# ==================== CSS ENTERPRISE ====================
+# ==================== CSS MODERN CARD UI ====================
 
 st.markdown("""
     <style>
-    /* Reset y Fuentes */
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    /* Global Styles */
     html, body, [class*="css"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        font-size: 13px;
-        color: #1a1a1a;
+        font-size: 14px;
+        color: #1f2937;
     }
     
-    /* Títulos Sobrios */
-    h1 { 
-        font-size: 24px; 
-        font-weight: 600; 
-        color: #111; 
-        letter-spacing: -0.5px; 
+    /* Background color suave */
+    .main {
+        background-color: #f8fafc;
+    }
+    
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        padding-left: 3rem;
+        padding-right: 3rem;
+    }
+    
+    /* Card Component - CRÍTICO */
+    .card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        margin-bottom: 20px;
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    /* Card para KPIs más compacta */
+    .card-kpi {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        margin-bottom: 16px;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    /* Typography */
+    h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #111827;
+        letter-spacing: -0.5px;
         margin-bottom: 8px;
-        margin-top: 0;
     }
     
     h2 {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
-        color: #111;
-        letter-spacing: -0.3px;
-        margin-top: 16px;
-        margin-bottom: 8px;
+        color: #374151;
+        margin-bottom: 16px;
     }
     
-    h3 { 
-        font-size: 14px; 
-        font-weight: 600; 
-        color: #444; 
-        margin-top: 12px;
-        margin-bottom: 8px;
+    h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        margin-bottom: 12px;
     }
     
-    /* Métricas Compactas con Números Monoespaciados */
+    /* Metrics - Diseño Card */
     [data-testid="stMetricValue"] {
-        font-size: 28px !important;
-        font-weight: 500 !important;
-        font-family: 'SF Mono', 'Consolas', 'Courier New', monospace !important;
+        font-size: 32px !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
         font-variant-numeric: tabular-nums !important;
-        color: #0f172a !important;
     }
     
-    [data-testid="stMetricLabel"] { 
-        font-size: 11px !important; 
-        color: #666 !important; 
+    [data-testid="stMetricLabel"] {
+        font-size: 12px !important;
         font-weight: 600 !important;
+        color: #6b7280 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
+        margin-bottom: 8px !important;
     }
     
-    [data-testid="stMetricDelta"] { 
-        font-size: 11px !important;
-        font-family: 'SF Mono', 'Consolas', monospace !important;
+    [data-testid="stMetricDelta"] {
+        font-size: 13px !important;
+        font-weight: 500 !important;
     }
-
-    /* Sidebar Minimalista */
-    [data-testid="stSidebar"] { 
-        background-color: #fafafa; 
+    
+    /* Sidebar moderna */
+    [data-testid="stSidebar"] {
+        background-color: #ffffff;
         border-right: 1px solid #e5e7eb;
     }
     
-    /* Tablas estilo Excel/Stripe */
-    .stDataFrame { 
-        border: 1px solid #e5e7eb; 
-        border-radius: 4px;
-        font-size: 12px;
+    [data-testid="stSidebar"] h3 {
+        color: #111827;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
     }
     
-    /* Tabs minimalistas */
+    /* Tabs modernas */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0;
-        border-bottom: 1px solid #e5e7eb;
+        gap: 8px;
+        background-color: transparent;
+        border-bottom: 2px solid #e5e7eb;
     }
     
     .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        padding: 0px 20px;
+        height: 48px;
+        padding: 0px 24px;
         background-color: transparent;
         border: none;
         color: #6b7280;
         font-weight: 500;
-        font-size: 13px;
+        font-size: 14px;
+        border-radius: 8px 8px 0 0;
     }
     
     .stTabs [aria-selected="true"] {
         background-color: transparent;
-        color: #0f172a;
-        border-bottom: 2px solid #0f172a;
+        color: #6366f1;
+        border-bottom: 2px solid #6366f1;
+        margin-bottom: -2px;
     }
     
-    /* Reducir espaciados globales */
-    .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
+    /* Dataframe styling */
+    .stDataFrame {
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        font-size: 13px;
     }
     
-    /* Botones minimalistas */
+    /* Buttons */
     .stButton>button {
-        border: 1px solid #e5e7eb;
-        background-color: white;
-        color: #374151;
-        font-size: 12px;
+        border-radius: 8px;
         font-weight: 500;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
+        font-size: 14px;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.2s ease;
     }
     
-    .stButton>button:hover {
-        border-color: #9ca3af;
-        background-color: #f9fafb;
-    }
-    
-    /* Download button específico */
     .stDownloadButton>button {
-        border: 1px solid #e5e7eb;
-        background-color: white;
-        color: #374151;
-        font-size: 11px;
+        background-color: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 8px;
         font-weight: 500;
-        padding: 0.4rem 0.8rem;
+        padding: 0.5rem 1.5rem;
     }
     
-    /* Inputs y selectores minimalistas */
+    .stDownloadButton>button:hover {
+        background-color: #4f46e5;
+    }
+    
+    /* MultiSelect */
     .stMultiSelect [data-baseweb="select"] {
-        border: 1px solid #e5e7eb;
-        font-size: 12px;
+        border-radius: 8px;
+        border-color: #e5e7eb;
     }
     
-    /* Info boxes discretos */
-    .stAlert {
-        background-color: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-        padding: 0.75rem;
-        font-size: 12px;
+    /* Caption styling */
+    .caption-text {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 8px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -215,7 +249,6 @@ st.markdown("""
 def init_connection():
     """Inicializa conexión a PostgreSQL."""
     database_url = os.getenv('DATABASE_URL')
-    
     if not database_url:
         st.error("DATABASE_URL not configured")
         st.stop()
@@ -232,7 +265,7 @@ def init_connection():
 
 @st.cache_data(ttl=300)
 def load_data():
-    """Carga y transforma datos con optimización vectorizada."""
+    """Carga y transforma datos."""
     engine = init_connection()
     
     query = """
@@ -246,21 +279,17 @@ def load_data():
         df = pd.read_sql(query, engine)
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         
-        # Vectorización pura
+        # Vectorización
         df['amount_usd'] = df['amount'] * df['currency'].map(EXCHANGE_RATES).fillna(1.0)
         
-        # Temporal data
+        # Temporal
         df['date'] = df['timestamp'].dt.date
         df['year_month'] = df['timestamp'].dt.to_period('M').astype(str)
         df['week'] = df['timestamp'].dt.to_period('W').astype(str)
         df['day_of_week'] = df['timestamp'].dt.day_name()
         df['hour'] = df['timestamp'].dt.hour
         
-        # Formato fecha ISO corto
-        df['date_display'] = df['timestamp'].dt.strftime('%a, %b %d')
-        
         return df
-    
     except Exception as e:
         st.error(f"Data loading failed: {e}")
         st.stop()
@@ -268,10 +297,9 @@ def load_data():
 # ==================== UTILIDADES ====================
 
 def format_currency(value):
-    """Formatea moneda con estilo financiero."""
+    """Formatea moneda."""
     if pd.isna(value) or value == 0:
         return "$0"
-    
     if abs(value) >= 1_000_000_000:
         return f"${value/1_000_000_000:.2f}B"
     elif abs(value) >= 1_000_000:
@@ -283,93 +311,65 @@ def format_currency(value):
 
 
 def format_number(value):
-    """Formatea números con separadores."""
+    """Formatea números."""
     return f"{value:,}" if not pd.isna(value) else "0"
 
 
 def calculate_delta(df, metric_col='amount_usd', period_col='year_month'):
-    """Calcula delta % robusto."""
+    """Calcula delta robusto."""
     try:
         if len(df) == 0 or period_col not in df.columns:
             return 0
-        
         periods = sorted(df[period_col].unique())
         if len(periods) < 2:
             return 0
-        
         current = df[df[period_col] == periods[-1]][metric_col].sum()
         previous = df[df[period_col] == periods[-2]][metric_col].sum()
-        
         if previous == 0:
             return 0
-        
         return ((current - previous) / previous * 100)
     except:
         return 0
 
-# ==================== COMPONENTES ====================
+# ==================== COMPONENTES UI ====================
 
-def render_ledger_table(df):
-    """Tabla resumen estilo libro mayor (The Ledger)."""
-    st.markdown("### Currency Ledger")
-    
-    ledger = df.groupby('currency').agg({
-        'amount_usd': 'sum',
-        'id': 'count'
-    }).reset_index()
-    
-    total_volume = ledger['amount_usd'].sum()
-    ledger['percentage'] = (ledger['amount_usd'] / total_volume * 100).round(2)
-    
-    ledger.columns = ['Currency', 'Volume (USD)', 'Transactions', '% of Total']
-    ledger = ledger.sort_values('Volume (USD)', ascending=False)
-    
-    # Formatear
-    ledger['Volume (USD)'] = ledger['Volume (USD)'].apply(format_currency)
-    ledger['Transactions'] = ledger['Transactions'].apply(format_number)
-    ledger['% of Total'] = ledger['% of Total'].apply(lambda x: f"{x}%")
-    
-    st.dataframe(
-        ledger,
-        use_container_width=True,
-        hide_index=True,
-        height=180
-    )
-
-
-def render_kpis(df):
-    """KPIs minimalistas con números monoespaciados."""
+def render_kpis_cards(df):
+    """Renderiza KPIs en tarjetas."""
     if len(df) == 0:
         st.warning("No data available")
         return
     
     col1, col2, col3, col4 = st.columns(4)
     
-    # Total Transactions
+    # KPI 1: Total Transactions
     total = len(df)
     delta_txn = calculate_delta(
         df.groupby('year_month').size().reset_index(name='count').assign(amount_usd=lambda x: x['count'])
     )
     
     with col1:
+        st.markdown('<div class="card-kpi">', unsafe_allow_html=True)
         st.metric(
             label="Total Transactions",
             value=format_number(total),
             delta=f"{delta_txn:+.1f}% MoM" if delta_txn != 0 else None
         )
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    # Total Volume
+    # KPI 2: Total Volume
     volume = df['amount_usd'].sum()
     delta_vol = calculate_delta(df)
     
     with col2:
+        st.markdown('<div class="card-kpi">', unsafe_allow_html=True)
         st.metric(
             label="Total Volume",
             value=format_currency(volume),
             delta=f"{delta_vol:+.1f}% MoM" if delta_vol != 0 else None
         )
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    # Average Ticket
+    # KPI 3: Average Ticket
     avg = df['amount_usd'].mean()
     try:
         periods = sorted(df['year_month'].unique())
@@ -383,26 +383,30 @@ def render_kpis(df):
         delta_avg = 0
     
     with col3:
+        st.markdown('<div class="card-kpi">', unsafe_allow_html=True)
         st.metric(
             label="Average Ticket",
             value=format_currency(avg),
             delta=f"{delta_avg:+.1f}% MoM" if delta_avg != 0 else None
         )
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    # Success Rate
+    # KPI 4: Success Rate
     completed = len(df[df['status'] == 'COMPLETED'])
     success_rate = (completed / len(df) * 100) if len(df) > 0 else 0
     
     with col4:
+        st.markdown('<div class="card-kpi">', unsafe_allow_html=True)
         st.metric(
             label="Success Rate",
             value=f"{success_rate:.1f}%",
             delta=f"{completed:,} completed"
         )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
-def create_trend_chart(df):
-    """Gráfico minimalista de tendencia."""
+def create_trend_area_chart(df):
+    """Gráfico de área con gradiente moderno."""
     daily = df.groupby('date').agg({
         'amount_usd': 'sum',
         'id': 'count'
@@ -410,64 +414,123 @@ def create_trend_chart(df):
     
     fig = go.Figure()
     
-    # Área principal
+    # Area chart con gradiente
     fig.add_trace(go.Scatter(
         x=daily['date'],
         y=daily['amount_usd'],
         name='Volume',
         mode='lines',
-        line=dict(color=COLOR_ACCENT, width=2),
+        line=dict(color='#6366f1', width=3),
         fill='tozeroy',
-        fillcolor=f'rgba(59, 130, 246, 0.1)',
+        fillcolor='rgba(99, 102, 241, 0.2)',
         hovertemplate='<b>%{x}</b><br>Volume: $%{y:,.0f}<extra></extra>'
     ))
     
     fig.update_layout(
-        title='Daily Volume Trend',
+        title=dict(
+            text='Daily Transaction Volume',
+            font=dict(size=16, weight=600, color='#374151')
+        ),
         xaxis_title='',
         yaxis_title='Volume (USD)',
-        height=300,
-        margin=dict(l=40, r=20, t=40, b=30),
+        height=350,  # Altura fija para alineación
+        margin=dict(l=60, r=40, t=60, b=40),
         hovermode='x unified',
         template='plotly_white',
-        font=dict(family='Inter, sans-serif', size=11),
+        font=dict(family='Inter, sans-serif', size=12),
         showlegend=False,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
     )
     
     fig.update_xaxes(showgrid=False, zeroline=False)
-    fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
+    fig.update_yaxes(
+        showgrid=True, 
+        gridcolor='#f3f4f6', 
+        zeroline=False, 
+        tickformat='$,.0f'
+    )
     
     return fig
 
 
-def create_status_chart(df):
-    """Gráfico de barras horizontal minimalista."""
+def create_status_donut_chart(df):
+    """Donut chart moderno para distribución de status."""
     status_data = df.groupby('status').size().reset_index(name='count')
-    status_data = status_data.sort_values('count', ascending=True)
     
     colors = [STATUS_COLORS.get(s, COLOR_GRAY) for s in status_data['status']]
     
-    fig = go.Figure(go.Bar(
-        x=status_data['count'],
-        y=status_data['status'],
-        orientation='h',
-        marker=dict(color=colors),
-        text=status_data['count'],
+    fig = go.Figure(go.Pie(
+        labels=status_data['status'],
+        values=status_data['count'],
+        hole=0.6,  # Donut hole
+        marker=dict(
+            colors=colors,
+            line=dict(color='#ffffff', width=3)
+        ),
+        textinfo='label+percent',
         textposition='outside',
-        texttemplate='%{text:,}',
-        hovertemplate='<b>%{y}</b><br>Count: %{x:,}<extra></extra>'
+        textfont=dict(size=12, family='Inter'),
+        hovertemplate='<b>%{label}</b><br>Transactions: %{value:,}<br>%{percent}<extra></extra>'
     ))
     
     fig.update_layout(
-        title='Status Distribution',
+        title=dict(
+            text='Status Distribution',
+            font=dict(size=16, weight=600, color='#374151')
+        ),
+        height=350,  # Altura fija para alineación
+        margin=dict(l=20, r=20, t=60, b=20),
+        template='plotly_white',
+        font=dict(family='Inter, sans-serif', size=12),
+        showlegend=True,
+        legend=dict(
+            orientation="v",
+            yanchor="middle",
+            y=0.5,
+            xanchor="left",
+            x=1.1
+        ),
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
+    
+    return fig
+
+
+def create_currency_bar_chart(df):
+    """Gráfico de barras con márgenes corregidos."""
+    currency_data = df.groupby('currency').agg({
+        'amount': 'sum',
+        'id': 'count'
+    }).reset_index()
+    currency_data = currency_data.sort_values('amount', ascending=True)
+    
+    fig = go.Figure(go.Bar(
+        x=currency_data['amount'],
+        y=currency_data['currency'],
+        orientation='h',
+        marker=dict(
+            color='#6366f1',
+            line=dict(color='#4f46e5', width=1)
+        ),
+        text=currency_data['amount'],
+        textposition='outside',
+        texttemplate='%{text:,.0f}',
+        customdata=currency_data['id'],
+        hovertemplate='<b>%{y}</b><br>Volume: %{x:,.0f}<br>Transactions: %{customdata:,}<extra></extra>'
+    ))
+    
+    fig.update_layout(
+        title=dict(
+            text='Volume by Currency (Original)',
+            font=dict(size=16, weight=600, color='#374151')
+        ),
         xaxis_title='',
         yaxis_title='',
-        height=250,
-        margin=dict(l=80, r=40, t=40, b=30),
+        height=350,
+        margin=dict(l=60, r=100, t=60, b=40),  # Margen derecho aumentado
         template='plotly_white',
-        font=dict(family='Inter, sans-serif', size=11),
+        font=dict(family='Inter, sans-serif', size=12),
         showlegend=False,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
@@ -479,86 +542,14 @@ def create_status_chart(df):
     return fig
 
 
-def create_currency_chart(df):
-    """Gráfico de barras por moneda (escala de grises)."""
-    currency_data = df.groupby('currency').agg({
-        'amount': 'sum',
-        'id': 'count'
-    }).reset_index()
-    currency_data = currency_data.sort_values('amount', ascending=False)
+def render_transaction_table_card(df):
+    """Tabla de transacciones en tarjeta."""
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     
-    # Colores en escala de grises
-    gray_scale = ['#374151', '#6b7280', '#9ca3af', '#d1d5db']
-    colors = [gray_scale[i % len(gray_scale)] for i in range(len(currency_data))]
+    st.markdown("### Recent Transactions")
+    st.markdown('<p class="caption-text">Last 50 transactions with amounts normalized to USD</p>', unsafe_allow_html=True)
     
-    fig = go.Figure(go.Bar(
-        x=currency_data['currency'],
-        y=currency_data['amount'],
-        marker=dict(color=colors),
-        text=currency_data['amount'],
-        textposition='outside',
-        texttemplate='%{text:,.0f}',
-        customdata=currency_data['id'],
-        hovertemplate='<b>%{x}</b><br>Volume: %{y:,.0f}<br>Transactions: %{customdata:,}<extra></extra>'
-    ))
-    
-    fig.update_layout(
-        title='Volume by Currency (Original)',
-        xaxis_title='',
-        yaxis_title='',
-        height=300,
-        margin=dict(l=40, r=20, t=40, b=30),
-        template='plotly_white',
-        font=dict(family='Inter, sans-serif', size=11),
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)'
-    )
-    
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat=',')
-    
-    return fig
-
-
-def create_device_chart(df):
-    """Gráfico simple de dispositivos."""
-    device_data = df.groupby('client_device').agg({
-        'amount_usd': 'sum'
-    }).reset_index()
-    
-    fig = go.Figure(go.Bar(
-        x=device_data['client_device'],
-        y=device_data['amount_usd'],
-        marker=dict(color=[COLOR_ACCENT, COLOR_GRAY]),
-        text=device_data['amount_usd'],
-        textposition='outside',
-        texttemplate='$%{text:,.0f}',
-        hovertemplate='<b>%{x}</b><br>Volume: $%{y:,.0f}<extra></extra>'
-    ))
-    
-    fig.update_layout(
-        title='Volume by Device (USD)',
-        xaxis_title='',
-        yaxis_title='',
-        height=280,
-        margin=dict(l=40, r=20, t=40, b=30),
-        template='plotly_white',
-        font=dict(family='Inter, sans-serif', size=11),
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)'
-    )
-    
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
-    
-    return fig
-
-
-def render_data_table(df):
-    """Tabla de datos estilo Excel."""
-    display_df = df.head(100).copy()
+    display_df = df.head(50).copy()
     
     column_config = {
         "timestamp": st.column_config.DatetimeColumn(
@@ -584,42 +575,35 @@ def render_data_table(df):
             "Status",
             width="small"
         ),
-        "client_email": st.column_config.TextColumn(
-            "Client",
-            width="large"
-        ),
         "client_device": st.column_config.TextColumn(
             "Device",
             width="small"
         )
     }
     
-    columns = ['timestamp', 'amount', 'currency', 'amount_usd', 'status', 'client_email', 'client_device']
+    columns = ['timestamp', 'amount', 'currency', 'amount_usd', 'status', 'client_device']
     
     st.dataframe(
         display_df[columns],
         column_config=column_config,
         use_container_width=True,
-        height=500,
+        height=400,
         hide_index=True
     )
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== MAIN ====================
 
 def main():
     """Aplicación principal."""
     
-    # Header minimalista
+    # Header
     col1, col2 = st.columns([3, 1])
     
     with col1:
         st.title("Financial Intelligence")
-        st.caption("Real-time transaction analytics | USD normalized")
-    
-    with col2:
-        # Export button discreto
-        if st.button("Export Data", type="secondary", use_container_width=False):
-            st.session_state.show_export = True
+        st.markdown('<p class="caption-text">Real-time transaction analytics with USD normalization</p>', unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -630,6 +614,7 @@ def main():
     # ==================== SIDEBAR ====================
     
     st.sidebar.markdown("### Filters")
+    st.sidebar.markdown("---")
     
     # Filtros
     all_currencies = sorted(df['currency'].unique())
@@ -657,18 +642,17 @@ def main():
     
     st.sidebar.markdown("---")
     
-    # Export en sidebar si activado
-    if st.session_state.get('show_export', False):
-        csv = df.to_csv(index=False)
-        st.sidebar.download_button(
-            label="Download CSV",
-            data=csv,
-            file_name=f"transactions_{datetime.now().strftime('%Y%m%d')}.csv",
-            mime="text/csv"
-        )
+    # Export
+    csv = df.to_csv(index=False)
+    st.sidebar.download_button(
+        label="Export to CSV",
+        data=csv,
+        file_name=f"transactions_{datetime.now().strftime('%Y%m%d')}.csv",
+        mime="text/csv"
+    )
     
     st.sidebar.markdown("---")
-    st.sidebar.caption("Exchange Rates (Fixed)")
+    st.sidebar.markdown("**Exchange Rates**")
     st.sidebar.caption("USD: 1.00 | EUR: 1.08")
     st.sidebar.caption("GBP: 1.27 | COP: 0.00025")
     
@@ -699,40 +683,46 @@ def main():
     
     # ==================== TABS ====================
     
-    tab1, tab2, tab3 = st.tabs(["Overview", "Analysis", "Data"])
+    tab1, tab2, tab3 = st.tabs(["Overview", "Analysis", "Transactions"])
     
     # TAB 1: OVERVIEW
     with tab1:
-        # Ledger table primero
-        render_ledger_table(df_filtered)
+        # Fila 1: KPIs en Cards
+        render_kpis_cards(df_filtered)
         
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
         
-        # KPIs
-        render_kpis(df_filtered)
-        
-        st.markdown("---")
-        
-        # Gráficos principales
+        # Fila 2: Gráficos principales en Cards (2/3 y 1/3)
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            st.plotly_chart(create_trend_chart(df_filtered), use_container_width=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.plotly_chart(create_trend_area_chart(df_filtered), use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
-            st.plotly_chart(create_status_chart(df_filtered), use_container_width=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.plotly_chart(create_status_donut_chart(df_filtered), use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
-        # Stats adicionales
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Fila 3: Stats adicionales en Cards
+        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("### Key Statistics")
         
         col1, col2, col3, col4 = st.columns(4)
         
+        # Filtrar valores > 0 para max/min
+        valid_amounts = df_filtered[df_filtered['amount_usd'] > 0]['amount_usd']
+        
         with col1:
-            st.metric("Max Transaction", format_currency(df_filtered['amount_usd'].max()))
+            max_val = valid_amounts.max() if len(valid_amounts) > 0 else 0
+            st.metric("Max Transaction", format_currency(max_val))
         
         with col2:
-            st.metric("Min Transaction", format_currency(df_filtered['amount_usd'].min()))
+            min_val = valid_amounts.min() if len(valid_amounts) > 0 else 0
+            st.metric("Min Transaction", format_currency(min_val))
         
         with col3:
             unique = df_filtered['client_email'].nunique()
@@ -741,20 +731,63 @@ def main():
         with col4:
             mobile_pct = len(df_filtered[df_filtered['client_device'] == 'mobile']) / len(df_filtered) * 100
             st.metric("Mobile Share", f"{mobile_pct:.1f}%")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
     # TAB 2: ANALYSIS
     with tab2:
-        st.markdown("### Segment Analysis")
-        
+        # Gráficos de análisis en Cards
         col1, col2 = st.columns(2)
         
         with col1:
-            st.plotly_chart(create_currency_chart(df_filtered), use_container_width=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.plotly_chart(create_currency_bar_chart(df_filtered), use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
-            st.plotly_chart(create_device_chart(df_filtered), use_container_width=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            
+            # Device analysis
+            device_data = df_filtered.groupby('client_device').agg({
+                'amount_usd': 'sum'
+            }).reset_index()
+            
+            fig = go.Figure(go.Bar(
+                x=device_data['client_device'],
+                y=device_data['amount_usd'],
+                marker=dict(color=['#6366f1', '#10b981']),
+                text=device_data['amount_usd'],
+                textposition='outside',
+                texttemplate='$%{text:,.0f}',
+                hovertemplate='<b>%{x}</b><br>Volume: $%{y:,.0f}<extra></extra>'
+            ))
+            
+            fig.update_layout(
+                title=dict(
+                    text='Volume by Device (USD)',
+                    font=dict(size=16, weight=600, color='#374151')
+                ),
+                xaxis_title='',
+                yaxis_title='',
+                height=350,
+                margin=dict(l=60, r=40, t=60, b=40),
+                template='plotly_white',
+                font=dict(family='Inter, sans-serif', size=12),
+                showlegend=False,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)'
+            )
+            
+            fig.update_xaxes(showgrid=False)
+            fig.update_yaxes(showgrid=True, gridcolor='#f3f4f6', zeroline=False, tickformat='$,.0f')
+            
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Status breakdown table en Card
+        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("### Status Breakdown")
         
         status_summary = df_filtered.groupby('status').agg({
@@ -766,17 +799,19 @@ def main():
         status_summary['Count'] = status_summary['Count'].apply(format_number)
         
         st.dataframe(status_summary, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    # TAB 3: DATA
+    # TAB 3: TRANSACTIONS
     with tab3:
-        st.markdown("### Transaction Data (Last 100)")
-        st.caption("All amounts normalized to USD using fixed exchange rates")
-        
-        render_data_table(df_filtered)
+        render_transaction_table_card(df_filtered)
     
-    # Footer minimalista
+    # Footer
     st.markdown("---")
-    st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | PostgreSQL on Railway | v4.0 Enterprise")
+    st.markdown(
+        f'<p class="caption-text" style="text-align: center;">Last updated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | '
+        f'v5.0 Modern SaaS Card UI | PostgreSQL on Railway</p>',
+        unsafe_allow_html=True
+    )
 
 
 if __name__ == "__main__":
