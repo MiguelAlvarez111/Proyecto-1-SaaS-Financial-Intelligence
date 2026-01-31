@@ -82,7 +82,7 @@ st.markdown("""
     }
     
     .block-container {
-        padding-top: 1.5rem;
+        padding-top: 3rem;
         padding-bottom: 2rem;
         padding-left: 3rem;
         padding-right: 3rem;
@@ -240,13 +240,14 @@ st.markdown("""
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 6px 12px;
+        padding: 8px 16px;
         background: #f0fdf4;
         border: 1px solid #86efac;
         border-radius: 20px;
         font-size: 12px;
         color: #166534;
         font-weight: 500;
+        margin-top: 4px;
     }
     
     .live-dot {
@@ -592,6 +593,9 @@ def main():
     
     # ==================== HEADER ====================
     
+    # Add spacing at top
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([5, 3, 2])
     
     with col1:
@@ -599,6 +603,7 @@ def main():
         st.caption("Real-time transaction analytics with USD normalization")
     
     with col2:
+        st.markdown("<br>", unsafe_allow_html=True)
         time_ago = get_time_ago(st.session_state.last_refresh)
         st.markdown(f"""
         <div class="live-badge">
@@ -608,6 +613,7 @@ def main():
         """, unsafe_allow_html=True)
     
     with col3:
+        st.markdown("<br>", unsafe_allow_html=True)
         if st.button("❓ Help", use_container_width=True):
             st.session_state.show_help = not st.session_state.show_help
     
