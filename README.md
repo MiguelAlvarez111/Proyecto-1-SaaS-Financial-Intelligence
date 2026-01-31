@@ -143,6 +143,17 @@ Este script de prueba ejecuta todas las transformaciones y muestra:
 - Validación de calidad de datos
 - Guarda una muestra transformada en `transformed_sample.json`
 
+**Opción 3: Verificar datos en PostgreSQL**
+```bash
+python3 verify_database.py
+```
+
+Este script consulta la base de datos y muestra:
+- Total de registros cargados
+- Estadísticas por moneda, status y dispositivo
+- Top 10 transacciones más grandes
+- Rango de fechas
+
 ### 📊 Output Esperado
 
 El pipeline mostrará:

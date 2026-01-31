@@ -22,7 +22,8 @@ from sqlalchemy import (
     DateTime,
     Integer,
     Table,
-    MetaData
+    MetaData,
+    text
 )
 from sqlalchemy.types import TIMESTAMP, NUMERIC, VARCHAR
 
@@ -74,7 +75,7 @@ class ETLPipeline:
             )
             # Test de conexión
             with self.engine.connect() as conn:
-                conn.execute("SELECT 1")
+                conn.execute(text("SELECT 1"))
             print("✅ Conexión exitosa a PostgreSQL")
         except Exception as e:
             print(f"❌ Error al conectar a la base de datos: {e}")
@@ -413,7 +414,7 @@ class ETLPipeline:
             
             # Verificar la carga
             with self.engine.connect() as conn:
-                result = conn.execute(f"SELECT COUNT(*) FROM {table_name}")
+                result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 count = result.fetchone()[0]
                 print(f"  ✅ Verificación: {count:,} registros en la tabla")
         
