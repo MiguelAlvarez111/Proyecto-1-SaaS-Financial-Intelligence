@@ -1,6 +1,8 @@
 # SaaS Financial Intelligence
 
-![Dashboard Preview](docs/preview.png)
+[**Live demo →**](https://proud-essence-production-fc99.up.railway.app)
+
+[![Dashboard Preview](docs/preview.png)](https://proud-essence-production-fc99.up.railway.app)
 
 > **Real-time transaction analytics platform with vector-based ETL.**  
 > Designed for high-volume financial data integrity and decision-making.
@@ -67,6 +69,8 @@ npm run dev
 Dashboard: **http://localhost:3000**
 
 If the backend is not running, the frontend shows demo data and a clear message instead of failing silently.
+
+**Production (Railway):** In the frontend service, set `NEXT_PUBLIC_API_URL` to your backend URL **with `https://`** (e.g. `https://proyecto-1-saas-financial-intelligence-production.up.railway.app`). Then **redeploy the frontend**—Next.js bakes `NEXT_PUBLIC_*` at build time, so a new deploy is required for the change to take effect.
 
 ---
 
