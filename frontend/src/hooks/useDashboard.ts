@@ -1,9 +1,27 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { DashboardData, FilterState } from "@/types";
+import { DashboardData, FilterState, Transaction } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+const PAGE_SIZE = 50;
+
+/** Fetch a page of transactions for the Transactions tab (progressive loading). */
+export async function fetchTransactionsPage(
+  limit: number = PAGE_SIZE,
+  offset: number = 0
+): Promise<Transaction[]> {
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  params.set("offset", String(offset));
+  const response = await fetch(`${API_BASE_URL}/api/transactions?${params}`);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(typeof err.detail === "string" ? err.detail : `HTTP ${response.status}`);
+  }
+  return response.json();
+}
 
 interface UseDashboardOptions {
   autoRefresh?: boolean;
@@ -101,11 +119,13 @@ export async function fetchFilters() {
   }
 }
 
+const EXPORT_LIMIT = 10000; // máximo del backend (api/transactions)
+
 export async function exportTransactions(filters?: Partial<FilterState>): Promise<Blob | null> {
   try {
     const params = new URLSearchParams();
-    params.set("limit", "10000");
-    
+    params.set("limit", String(EXPORT_LIMIT));
+
     if (filters?.currencies?.length) {
       params.set("currencies", filters.currencies.join(","));
     }
@@ -114,7 +134,10 @@ export async function exportTransactions(filters?: Partial<FilterState>): Promis
     }
 
     const response = await fetch(`${API_BASE_URL}/api/transactions?${params}`);
-    if (!response.ok) throw new Error("Failed to export");
+    if (!response.ok) {
+      const msg = await response.json().catch(() => ({}));
+      throw new Error(typeof msg?.detail === "string" ? msg.detail : "Failed to export");
+    }
     
     const data = await response.json();
     

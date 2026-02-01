@@ -1,369 +1,443 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  CurrencyDollarIcon,
-  ArrowTrendingUpIcon,
-  ChartBarIcon,
-  CheckCircleIcon,
-} from "@heroicons/react/24/outline";
-
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { MetricCard } from "@/components/ui/MetricCard";
+import { TransactionTable } from "@/components/ui/TransactionTable";
+import { FilterBar } from "@/components/ui/FilterBar";
 import { AreaChartComponent } from "@/components/charts/AreaChartComponent";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { HorizontalBarChart } from "@/components/charts/HorizontalBarChart";
-import { TransactionTable } from "@/components/ui/TransactionTable";
+import { useDashboard, exportTransactions, fetchTransactionsPage } from "@/hooks/useDashboard";
 import { formatCurrency, formatNumber, chartColors } from "@/lib/utils";
-import { DashboardData, Transaction } from "@/types";
+import type { DashboardData, FilterState, Transaction } from "@/types";
 
-// Demo data - Replace with actual API calls
-const generateDemoData = (): DashboardData => {
-  const dailyVolume = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (29 - i));
-    return {
-      date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      volume: Math.floor(Math.random() * 2000000) + 500000,
-      count: Math.floor(Math.random() * 500) + 100,
-    };
-  });
+const STORAGE_COMPACT = "dashboard-compact";
+const STORAGE_REDUCE_MOTION = "dashboard-reduce-motion";
 
-  const statusDistribution = [
-    { status: "COMPLETED", count: 7500, percentage: 75 },
-    { status: "PENDING", count: 1200, percentage: 12 },
-    { status: "FAILED", count: 800, percentage: 8 },
-    { status: "REFUNDED", count: 500, percentage: 5 },
-  ];
-
-  const currencyVolume = [
-    { currency: "USD", amount: 45000000, count: 4500 },
-    { currency: "GBP", amount: 23000000, count: 2300 },
-    { currency: "EUR", amount: 22000000, count: 2200 },
-    { currency: "COP", amount: 30000, count: 1000 },
-  ];
-
-  const deviceVolume = [
-    { device: "Desktop", amount: 52000000, percentage: 52 },
-    { device: "Mobile", amount: 48000000, percentage: 48 },
-  ];
-
-  const recentTransactions: Transaction[] = Array.from({ length: 20 }, (_, i) => ({
-    id: `tx-${1000 + i}`,
-    timestamp: new Date(Date.now() - i * 3600000).toISOString(),
-    amount: Math.floor(Math.random() * 10000) + 100,
-    currency: ["USD", "EUR", "GBP", "COP"][Math.floor(Math.random() * 4)],
-    status: ["COMPLETED", "PENDING", "FAILED", "REFUNDED"][
-      Math.floor(Math.random() * 4)
-    ] as Transaction["status"],
-    amount_usd: Math.floor(Math.random() * 10000) + 100,
-    client_email: `user${i}@example.com`,
-    client_device: Math.random() > 0.5 ? "desktop" : "mobile",
-  }));
-
-  return {
-    kpis: {
-      totalVolume: 100240000,
-      totalTransactions: 10000,
-      avgTicket: 10024,
-      successRate: 75.2,
-      volumeDelta: 12.5,
-      transactionsDelta: 8.3,
-      avgTicketDelta: -2.1,
-    },
-    dailyVolume,
-    statusDistribution,
-    currencyVolume,
-    deviceVolume,
-    recentTransactions,
-    lastUpdated: new Date().toISOString(),
-  };
+const DEMO_DATA: DashboardData = {
+  kpis: {
+    totalVolume: 100_200_000,
+    totalTransactions: 10_000,
+    avgTicket: 10_024,
+    successRate: 75.2,
+    volumeDelta: 12.5,
+    transactionsDelta: 8.3,
+    avgTicketDelta: 2.1,
+  },
+  dailyVolume: [
+    { date: "Jan 25", volume: 3_200_000, count: 320 },
+    { date: "Jan 26", volume: 4_100_000, count: 410 },
+    { date: "Jan 27", volume: 2_800_000, count: 280 },
+    { date: "Jan 28", volume: 5_100_000, count: 510 },
+    { date: "Jan 29", volume: 4_500_000, count: 450 },
+    { date: "Jan 30", volume: 6_200_000, count: 620 },
+  ],
+  statusDistribution: [
+    { status: "COMPLETED", count: 7520, percentage: 75.2 },
+    { status: "FAILED", count: 1200, percentage: 12 },
+    { status: "PENDING", count: 980, percentage: 9.8 },
+    { status: "REFUNDED", count: 300, percentage: 3 },
+  ],
+  currencyVolume: [
+    { currency: "USD", amount: 60_000_000, count: 6000 },
+    { currency: "EUR", amount: 25_000_000, count: 2500 },
+    { currency: "GBP", amount: 12_000_000, count: 1200 },
+    { currency: "COP", amount: 3_200_000, count: 300 },
+  ],
+  deviceVolume: [
+    { device: "Mobile", amount: 55_000_000, percentage: 55 },
+    { device: "Desktop", amount: 35_000_000, percentage: 35 },
+    { device: "Tablet", amount: 10_200_000, percentage: 10.2 },
+  ],
+  recentTransactions: [
+    { id: "1", timestamp: new Date(Date.now() - 3600000).toISOString(), amount: 1250.5, currency: "USD", status: "COMPLETED", amount_usd: 1250.5, client_email: "demo@example.com", client_device: "mobile" },
+    { id: "2", timestamp: new Date(Date.now() - 7200000).toISOString(), amount: 890.25, currency: "EUR", status: "COMPLETED", amount_usd: 961.47, client_email: "demo@example.com", client_device: "desktop" },
+    { id: "3", timestamp: new Date(Date.now() - 10800000).toISOString(), amount: 500, currency: "USD", status: "PENDING", amount_usd: 500, client_email: "demo@example.com", client_device: "tablet" },
+    { id: "4", timestamp: new Date(Date.now() - 14400000).toISOString(), amount: 2000, currency: "GBP", status: "FAILED", amount_usd: 2540, client_email: "demo@example.com", client_device: "mobile" },
+    { id: "5", timestamp: new Date(Date.now() - 18000000).toISOString(), amount: 75000, currency: "COP", status: "COMPLETED", amount_usd: 18.75, client_email: "demo@example.com", client_device: "desktop" },
+  ],
+  lastUpdated: new Date().toISOString(),
 };
 
-export default function Dashboard() {
+const STATUS_COLORS = [
+  chartColors.success,
+  chartColors.danger,
+  chartColors.warning,
+  chartColors.info,
+];
+
+function getDefaultFilters(): FilterState {
+  const end = new Date();
+  const start = new Date();
+  start.setMonth(start.getMonth() - 1);
+  return {
+    currencies: [],
+    statuses: [],
+    dateRange: { start, end },
+    quickFilter: "",
+  };
+}
+
+export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [isLoading, setIsLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterState>(getDefaultFilters);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchingHint, setShowSearchingHint] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [compactMode, setCompactMode] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const [ledgerTransactions, setLedgerTransactions] = useState<Transaction[]>([]);
+  const [ledgerOffset, setLedgerOffset] = useState(0);
+  const [ledgerHasMore, setLedgerHasMore] = useState(true);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [ledgerLoadingMore, setLedgerLoadingMore] = useState(false);
+  const [ledgerError, setLedgerError] = useState<string | null>(null);
+  const ledgerInitialTried = useRef(false);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setData(generateDemoData());
-      setLastUpdated(new Date());
-      setIsLoading(false);
-    }, 1000);
+    if (activeTab !== "transactions") return;
+    if (ledgerTransactions.length > 0) return;
+    if (ledgerLoading) return;
+    if (ledgerInitialTried.current) return;
+    ledgerInitialTried.current = true;
+    setLedgerLoading(true);
+    setLedgerError(null);
+    fetchTransactionsPage(50, 0)
+      .then((list) => {
+        setLedgerTransactions(list);
+        setLedgerOffset(list.length);
+        setLedgerHasMore(list.length >= 50);
+      })
+      .catch((err) => {
+        setLedgerError(err instanceof Error ? err.message : "Failed to load");
+      })
+      .finally(() => setLedgerLoading(false));
+  }, [activeTab, ledgerTransactions.length, ledgerLoading]);
+
+  const loadMoreTransactions = useCallback(() => {
+    if (ledgerLoadingMore || !ledgerHasMore) return;
+    setLedgerLoadingMore(true);
+    fetchTransactionsPage(50, ledgerOffset)
+      .then((list) => {
+        setLedgerTransactions((prev) => {
+          const ids = new Set(prev.map((t) => t.id));
+          const newOnes = list.filter((t) => !ids.has(t.id));
+          return [...prev, ...newOnes];
+        });
+        setLedgerOffset((prev) => prev + list.length);
+        setLedgerHasMore(list.length >= 50);
+      })
+      .catch(() => setLedgerHasMore(false))
+      .finally(() => setLedgerLoadingMore(false));
+  }, [ledgerLoadingMore, ledgerHasMore, ledgerOffset]);
+
+  const retryLedger = useCallback(() => {
+    setLedgerLoading(true);
+    setLedgerError(null);
+    fetchTransactionsPage(50, 0)
+      .then((list) => {
+        setLedgerTransactions(list);
+        setLedgerOffset(list.length);
+        setLedgerHasMore(list.length >= 50);
+      })
+      .catch((err) => {
+        setLedgerError(err instanceof Error ? err.message : "Failed to load");
+      })
+      .finally(() => setLedgerLoading(false));
   }, []);
 
-  const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setData(generateDemoData());
-      setLastUpdated(new Date());
-      setIsLoading(false);
-    }, 500);
-  };
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    if (value.trim().length > 0 && activeTab !== "transactions") {
+      setActiveTab("transactions");
+      setShowSearchingHint(true);
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
+    }
+  }, [activeTab]);
 
-  const handleExport = () => {
-    // TODO: Implement CSV export
-    alert("Export feature coming soon!");
-  };
+  useEffect(() => {
+    if (!showSearchingHint) return;
+    const t = setTimeout(() => setShowSearchingHint(false), 1200);
+    return () => clearTimeout(t);
+  }, [showSearchingHint]);
 
-  if (isLoading || !data) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full"
-        />
-      </div>
-    );
-  }
+  useEffect(() => {
+    try {
+      const c = localStorage.getItem(STORAGE_COMPACT);
+      const r = localStorage.getItem(STORAGE_REDUCE_MOTION);
+      if (c !== null) setCompactMode(c === "true");
+      if (r !== null) setReduceMotion(r === "true");
+    } catch (_) {}
+  }, []);
 
-  const statusChartData = data.statusDistribution.map((item) => ({
-    name: item.status,
-    value: item.count,
-    color:
-      item.status === "COMPLETED"
-        ? chartColors.success
-        : item.status === "FAILED"
-        ? chartColors.danger
-        : item.status === "PENDING"
-        ? chartColors.warning
-        : chartColors.info,
+  const { data, isLoading, error, refresh, lastUpdated } = useDashboard(filters);
+
+  const displayData: DashboardData = data ?? DEMO_DATA;
+  const isDemo = !data;
+
+  const handleExport = useCallback(async () => {
+    const blob = await exportTransactions(filters);
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const k = displayData.kpis;
+  const donutData = displayData.statusDistribution.map((s, i) => ({
+    name: s.status,
+    value: s.count,
+    color: STATUS_COLORS[i % STATUS_COLORS.length],
+  }));
+  const currencyBarData = displayData.currencyVolume.map((c) => ({
+    name: c.currency,
+    value: c.amount,
+  }));
+  const deviceBarData = displayData.deviceVolume.map((d) => ({
+    name: d.device,
+    value: d.amount,
   }));
 
-  const currencyChartData = data.currencyVolume.map((item) => ({
-    name: item.currency,
-    value: item.amount,
-  }));
+  const toggleCompact = useCallback(() => {
+    setCompactMode((v) => {
+      const next = !v;
+      try { localStorage.setItem(STORAGE_COMPACT, String(next)); } catch (_) {}
+      return next;
+    });
+  }, []);
 
-  const deviceChartData = data.deviceVolume.map((item, i) => ({
-    name: item.device,
-    value: item.amount,
-    color: i === 0 ? chartColors.primary : chartColors.success,
-  }));
+  const toggleReduceMotion = useCallback(() => {
+    setReduceMotion((v) => {
+      const next = !v;
+      try { localStorage.setItem(STORAGE_REDUCE_MOTION, String(next)); } catch (_) {}
+      return next;
+    });
+  }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-slate-950">
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onRefresh={handleRefresh}
         onExport={handleExport}
+        onRefresh={refresh}
+        onOpenSettings={() => setShowSettingsModal(true)}
+        reduceMotion={reduceMotion}
       />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header
+          lastUpdated={lastUpdated ?? new Date()}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onOpenSettings={() => setShowSettingsModal(true)}
+          reduceMotion={reduceMotion}
+          searchInputRef={searchInputRef}
+        />
+        <main
+          className={`flex-1 overflow-auto ${compactMode ? "p-5" : "p-8"}`}
+        >
+          <FilterBar
+            filters={filters}
+            onChange={setFilters}
+            className={compactMode ? "mb-6" : "mb-10"}
+          />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header lastUpdated={lastUpdated} />
+          {error && (
+            <div className="mb-6 px-4 py-3 rounded-lg bg-amber-500/8 border border-amber-500/15 text-amber-300 text-[13px] space-y-1">
+              <p><strong>Backend unavailable.</strong> {error}. Showing demo data.</p>
+              <p className="text-slate-500 text-[12px] mt-2">
+                To use live data, start the backend:{" "}
+                <code className="bg-slate-800/60 px-2 py-0.5 rounded text-slate-400">
+                  cd backend && uvicorn main:app --reload --port 8000
+                </code>
+              </p>
+            </div>
+          )}
+          {isDemo && !error && (
+            <div className="mb-6 px-4 py-3 rounded-lg bg-indigo-500/8 border border-indigo-500/15 text-indigo-300 text-[13px]">
+              Connect the backend at <code className="text-slate-300">localhost:8000</code> for live data. Showing demo data.
+            </div>
+          )}
 
-        <main className="flex-1 overflow-y-auto p-8">
-          <AnimatePresence mode="wait">
-            {activeTab === "overview" && (
-              <motion.div
-                key="overview"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-8"
-              >
-                {/* KPI Cards Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {activeTab === "overview" && (
+            <div className={compactMode ? "space-y-6" : "space-y-10"}>
+              {/* KPI Grid - "Capítulo 1" */}
+              <section>
+                <div
+                  className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${compactMode ? "gap-4" : "gap-6"}`}
+                >
                   <MetricCard
                     title="Total Volume"
-                    value={formatCurrency(data.kpis.totalVolume)}
-                    delta={data.kpis.volumeDelta}
-                    icon={<CurrencyDollarIcon className="w-5 h-5" />}
-                    delay={0}
+                    value={formatCurrency(k.totalVolume)}
+                    delta={k.volumeDelta}
+                    delay={0.1}
+                    reduceMotion={reduceMotion}
                   />
                   <MetricCard
                     title="Transactions"
-                    value={formatNumber(data.kpis.totalTransactions)}
-                    delta={data.kpis.transactionsDelta}
-                    icon={<ArrowTrendingUpIcon className="w-5 h-5" />}
-                    delay={0.1}
+                    value={formatNumber(k.totalTransactions)}
+                    delta={k.transactionsDelta}
+                    delay={0.2}
+                    reduceMotion={reduceMotion}
                   />
                   <MetricCard
-                    title="Avg Ticket"
-                    value={formatCurrency(data.kpis.avgTicket)}
-                    delta={data.kpis.avgTicketDelta}
-                    icon={<ChartBarIcon className="w-5 h-5" />}
-                    delay={0.2}
+                    title="Average ticket"
+                    value={formatCurrency(k.avgTicket)}
+                    delta={k.avgTicketDelta}
+                    delay={0.3}
+                    reduceMotion={reduceMotion}
                   />
                   <MetricCard
                     title="Success Rate"
-                    value={`${data.kpis.successRate}%`}
-                    icon={<CheckCircleIcon className="w-5 h-5" />}
-                    delay={0.3}
+                    value={`${k.successRate}%`}
+                    delta={k.successRate >= 70 ? 2.1 : -1.5}
+                    delay={0.4}
+                    reduceMotion={reduceMotion}
                   />
                 </div>
+              </section>
 
-                {/* Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <AreaChartComponent
-                      data={data.dailyVolume}
-                      title="Daily Transaction Volume"
-                      delay={0.4}
-                    />
-                  </div>
-                  <DonutChart
-                    data={statusChartData}
-                    title="Status Distribution"
-                    delay={0.5}
-                  />
-                </div>
-
-                {/* Quick stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="glass-card text-center"
-                  >
-                    <p className="text-sm text-slate-400 mb-2">Max Transaction</p>
-                    <p className="text-2xl font-bold text-white">$9,847.32</p>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7 }}
-                    className="glass-card text-center"
-                  >
-                    <p className="text-sm text-slate-400 mb-2">Min Transaction</p>
-                    <p className="text-2xl font-bold text-white">$1.05</p>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 }}
-                    className="glass-card text-center"
-                  >
-                    <p className="text-sm text-slate-400 mb-2">Unique Clients</p>
-                    <p className="text-2xl font-bold text-white">2,847</p>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 }}
-                    className="glass-card text-center"
-                  >
-                    <p className="text-sm text-slate-400 mb-2">Mobile Share</p>
-                    <p className="text-2xl font-bold text-white">48.2%</p>
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "analysis" && (
-              <motion.div
-                key="analysis"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-8"
-              >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <HorizontalBarChart
-                    data={currencyChartData}
-                    title="Volume by Currency (Original)"
-                    delay={0}
-                  />
-                  <HorizontalBarChart
-                    data={deviceChartData}
-                    title="Volume by Device (USD)"
-                    delay={0.1}
-                  />
-                </div>
-
-                {/* Status Summary Table */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="glass-card"
+              {/* Charts Grid - "Capítulo 2" */}
+              <section>
+                <div
+                  className={`grid grid-cols-1 xl:grid-cols-2 ${compactMode ? "gap-5" : "gap-8"}`}
                 >
-                  <h3 className="text-lg font-semibold text-white mb-6">
-                    Status Breakdown
-                  </h3>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Status</th>
-                        <th>Count</th>
-                        <th>Percentage</th>
-                        <th>Progress</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.statusDistribution.map((item) => (
-                        <tr key={item.status}>
-                          <td>
-                            <span
-                              className={`badge ${
-                                item.status === "COMPLETED"
-                                  ? "badge-success"
-                                  : item.status === "FAILED"
-                                  ? "badge-danger"
-                                  : item.status === "PENDING"
-                                  ? "badge-warning"
-                                  : "badge-info"
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          </td>
-                          <td className="text-white font-semibold">
-                            {formatNumber(item.count)}
-                          </td>
-                          <td className="text-slate-300">{item.percentage}%</td>
-                          <td>
-                            <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${item.percentage}%` }}
-                                transition={{ duration: 1, delay: 0.3 }}
-                                className={`h-full rounded-full ${
-                                  item.status === "COMPLETED"
-                                    ? "bg-emerald-500"
-                                    : item.status === "FAILED"
-                                    ? "bg-red-500"
-                                    : item.status === "PENDING"
-                                    ? "bg-orange-500"
-                                    : "bg-blue-500"
-                                }`}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </motion.div>
-              </motion.div>
-            )}
+                  <AreaChartComponent
+                    data={displayData.dailyVolume}
+                    title="Daily volume (USD)"
+                    delay={0.2}
+                    reduceMotion={reduceMotion}
+                  />
+                  <DonutChart
+                    data={donutData}
+                    title="Status distribution"
+                    centerValue={formatNumber(displayData.statusDistribution.reduce((a, s) => a + s.count, 0))}
+                    centerLabel="Transactions"
+                    delay={0.3}
+                    reduceMotion={reduceMotion}
+                  />
+                </div>
+              </section>
+            </div>
+          )}
 
-            {activeTab === "transactions" && (
-              <motion.div
-                key="transactions"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <TransactionTable
-                  transactions={data.recentTransactions}
-                  delay={0}
+          {activeTab === "analysis" && (
+            <div className="space-y-8">
+              <p className="text-slate-500 text-[13px]">
+                Breakdown by currency and device. For KPIs and time trends, use Overview.
+              </p>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <HorizontalBarChart
+                  data={currencyBarData}
+                  title="Volume by currency"
+                  formatAsCurrency
+                  reduceMotion={reduceMotion}
                 />
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <HorizontalBarChart
+                  data={deviceBarData}
+                  title="Volume by device"
+                  formatAsCurrency
+                  reduceMotion={reduceMotion}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "transactions" && (
+            <div className="max-w-full">
+              <TransactionTable
+                transactions={ledgerTransactions}
+                searchQuery={searchQuery}
+                delay={reduceMotion ? 0 : 0.2}
+                reduceMotion={reduceMotion}
+                loading={ledgerLoading}
+                error={ledgerError}
+                hasMore={ledgerHasMore}
+                loadingMore={ledgerLoadingMore}
+                onLoadMore={loadMoreTransactions}
+                onRetry={retryLedger}
+                showSearchingHint={showSearchingHint}
+              />
+            </div>
+          )}
         </main>
       </div>
+
+      {/* Settings modal: Compact mode + Reduce motion */}
+      {showSettingsModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowSettingsModal(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-xl bg-slate-900 border border-slate-700/80 shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-white">Settings</h2>
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
+            <div className="space-y-4">
+              <label className="flex items-center justify-between gap-4 cursor-pointer">
+                <span className="text-[13px] text-slate-300">Compact mode</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={compactMode}
+                  onClick={toggleCompact}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${
+                    compactMode ? "bg-indigo-600" : "bg-slate-700"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                      compactMode ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </label>
+              <label className="flex items-center justify-between gap-4 cursor-pointer">
+                <span className="text-[13px] text-slate-300">Reduce motion</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={reduceMotion}
+                  onClick={toggleReduceMotion}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${
+                    reduceMotion ? "bg-indigo-600" : "bg-slate-700"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                      reduceMotion ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </label>
+            </div>
+            <p className="mt-4 text-[11px] text-slate-500">
+              Preferences are saved in this browser.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -24,14 +24,27 @@ interface HorizontalBarChartProps {
   title: string;
   delay?: number;
   formatAsCurrency?: boolean;
+  reduceMotion?: boolean;
 }
 
 const CustomTooltip = ({ active, payload, formatAsCurrency }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass-card !p-3 !rounded-xl border border-primary-500/30">
-        <p className="text-sm font-semibold text-white">{payload[0].payload.name}</p>
-        <p className="text-lg font-bold text-primary-400">
+      <div
+        style={{
+          background: "#0f172a",
+          border: "1px solid #334155",
+          borderRadius: 8,
+          padding: "10px 14px",
+        }}
+      >
+        <p style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>
+          {payload[0].payload.name}
+        </p>
+        <p
+          className="numeric"
+          style={{ fontSize: 16, fontWeight: 600, color: "#e2e8f0" }}
+        >
           {formatAsCurrency ? formatCurrency(payload[0].value) : payload[0].value.toLocaleString()}
         </p>
       </div>
@@ -45,37 +58,40 @@ export function HorizontalBarChart({
   title,
   delay = 0,
   formatAsCurrency = true,
+  reduceMotion = false,
 }: HorizontalBarChartProps) {
-  const defaultColors = ["#6366f1", "#a855f7", "#ec4899", "#10b981", "#f97316"];
+  // Colores indigo con variación de saturación
+  const defaultColors = ["#818cf8", "#6366f1", "#4f46e5", "#4338ca", "#3730a3"];
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay }}
+      transition={{ duration: reduceMotion ? 0 : 0.6, delay: reduceMotion ? 0 : delay }}
       className="glass-card h-[380px]"
     >
-      <h3 className="text-lg font-semibold text-white mb-6">{title}</h3>
+      <h3 className="text-sm font-medium text-slate-300 mb-6">{title}</h3>
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={data}
           layout="vertical"
           margin={{ top: 5, right: 50, left: 20, bottom: 5 }}
+          barCategoryGap="20%"
         >
           <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.05)"
-            horizontal={true}
-            vertical={false}
+            strokeDasharray="4 4"
+            stroke="rgba(255,255,255,0.03)"
+            horizontal={false}
+            vertical={true}
           />
           <XAxis
             type="number"
-            stroke="#64748b"
+            stroke="transparent"
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#64748b" }}
+            tick={{ fill: "#94a3b8" }}
             tickFormatter={(value) =>
               formatAsCurrency
                 ? value >= 1000000
@@ -87,20 +103,28 @@ export function HorizontalBarChart({
           <YAxis
             type="category"
             dataKey="name"
-            stroke="#64748b"
-            fontSize={12}
+            stroke="transparent"
+            fontSize={13}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#f8fafc" }}
+            tick={{ fill: "#e2e8f0" }}
             width={80}
           />
           <Tooltip
             content={<CustomTooltip formatAsCurrency={formatAsCurrency} />}
+            cursor={{ fill: "rgba(255, 255, 255, 0.02)" }}
+          />
+          {/* Background track for context */}
+          <Bar
+            dataKey={() => Math.max(...data.map(d => d.value)) * 1.1}
+            fill="rgba(255, 255, 255, 0.03)"
+            radius={[6, 6, 6, 6]}
+            isAnimationActive={false}
           />
           <Bar
             dataKey="value"
-            radius={[0, 8, 8, 0]}
-            animationDuration={1500}
+            radius={[6, 6, 6, 6]}
+            animationDuration={1200}
             animationEasing="ease-out"
           >
             {data.map((entry, index) => (

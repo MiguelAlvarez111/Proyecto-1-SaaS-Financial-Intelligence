@@ -328,10 +328,10 @@ async def get_dashboard_data(
 
 @app.get("/api/transactions", response_model=List[Transaction])
 async def get_transactions(
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(50, ge=1, le=10000),
     offset: int = Query(0, ge=0),
 ):
-    """Get paginated transactions."""
+    """Get paginated transactions. Max 10000 for export."""
     try:
         df = load_transactions()
         

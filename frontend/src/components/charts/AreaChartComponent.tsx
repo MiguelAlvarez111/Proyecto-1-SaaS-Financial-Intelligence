@@ -21,14 +21,25 @@ interface AreaChartComponentProps {
   data: DataPoint[];
   title: string;
   delay?: number;
+  reduceMotion?: boolean;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass-card !p-4 !rounded-xl border border-primary-500/30">
-        <p className="text-sm font-semibold text-white mb-1">{label}</p>
-        <p className="text-lg font-bold text-primary-400">
+      <div
+        style={{
+          background: "#0f172a",
+          border: "1px solid #334155",
+          borderRadius: 8,
+          padding: "10px 14px",
+        }}
+      >
+        <p style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>{label}</p>
+        <p
+          className="numeric"
+          style={{ fontSize: 16, fontWeight: 600, color: "#e2e8f0" }}
+        >
           {formatCurrency(payload[0].value)}
         </p>
       </div>
@@ -41,15 +52,16 @@ export function AreaChartComponent({
   data,
   title,
   delay = 0,
+  reduceMotion = false,
 }: AreaChartComponentProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay }}
+      transition={{ duration: reduceMotion ? 0 : 0.6, delay: reduceMotion ? 0 : delay }}
       className="glass-card h-[380px]"
     >
-      <h3 className="text-lg font-semibold text-white mb-6">{title}</h3>
+      <h3 className="text-sm font-medium text-slate-300 mb-6">{title}</h3>
       
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart
@@ -58,50 +70,48 @@ export function AreaChartComponent({
         >
           <defs>
             <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4} />
-              <stop offset="50%" stopColor="#6366f1" stopOpacity={0.15} />
+              <stop offset="0%" stopColor="#818cf8" stopOpacity={0.2} />
+              <stop offset="50%" stopColor="#6366f1" stopOpacity={0.08} />
               <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="50%" stopColor="#a855f7" />
-              <stop offset="100%" stopColor="#ec4899" />
             </linearGradient>
           </defs>
           <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.05)"
+            strokeDasharray="4 4"
+            stroke="rgba(255,255,255,0.04)"
             vertical={false}
           />
           <XAxis
             dataKey="date"
-            stroke="#64748b"
+            stroke="transparent"
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#64748b" }}
+            tick={{ fill: "#94a3b8" }}
+            dy={8}
           />
           <YAxis
-            stroke="#64748b"
+            stroke="transparent"
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#64748b" }}
+            tick={{ fill: "#94a3b8" }}
             tickFormatter={(value) =>
               value >= 1000000
                 ? `$${(value / 1000000).toFixed(0)}M`
                 : `$${(value / 1000).toFixed(0)}K`
             }
+            dx={-4}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(129, 140, 248, 0.2)", strokeWidth: 1 }} />
           <Area
             type="monotone"
             dataKey="volume"
-            stroke="url(#lineGradient)"
-            strokeWidth={3}
+            stroke="rgba(129, 140, 248, 0.88)"
+            strokeWidth={1.5}
             fill="url(#colorVolume)"
-            animationDuration={2000}
+            animationDuration={1200}
             animationEasing="ease-out"
+            activeDot={{ r: 5, fill: "#818cf8", stroke: "#0f172a", strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>
