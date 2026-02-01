@@ -88,6 +88,7 @@ export default function DashboardPage() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [compactMode, setCompactMode] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [ledgerTransactions, setLedgerTransactions] = useState<Transaction[]>([]);
@@ -232,8 +233,10 @@ export default function DashboardPage() {
         onRefresh={refresh}
         onOpenSettings={() => setShowSettingsModal(true)}
         reduceMotion={reduceMotion}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <Header
           lastUpdated={lastUpdated ?? new Date()}
           searchQuery={searchQuery}
@@ -243,9 +246,10 @@ export default function DashboardPage() {
           onOpenSettings={() => setShowSettingsModal(true)}
           reduceMotion={reduceMotion}
           searchInputRef={searchInputRef}
+          onOpenSidebar={() => setSidebarOpen(true)}
         />
         <main
-          className={`flex-1 overflow-auto ${compactMode ? "p-5" : "p-8"}`}
+          className={`flex-1 overflow-auto ${compactMode ? "p-4 sm:p-5" : "p-4 sm:p-6 lg:p-8"}`}
         >
           <FilterBar
             filters={filters}

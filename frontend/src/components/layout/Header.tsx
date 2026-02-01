@@ -8,6 +8,7 @@ import {
   Cog6ToothIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { getTimeAgo } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ interface HeaderProps {
   onOpenSettings?: () => void;
   reduceMotion?: boolean;
   searchInputRef?: React.RefObject<HTMLInputElement | null>;
+  onOpenSidebar?: () => void;
 }
 
 export function Header({
@@ -36,6 +38,7 @@ export function Header({
   onOpenSettings,
   reduceMotion = false,
   searchInputRef,
+  onOpenSidebar,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
@@ -59,20 +62,30 @@ export function Header({
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: reduceMotion ? 0 : 0.5 }}
-      className="h-14 flex items-center justify-between px-8 border-b border-slate-800/30 bg-slate-950/80 backdrop-blur-md"
+      className="h-14 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-slate-800/30 bg-slate-950/80 backdrop-blur-md gap-2"
     >
-      {/* Left side - Title */}
-      <div className="flex items-center gap-6">
-        <div>
-          <h1 className="text-base font-medium text-white">Dashboard</h1>
-          <p className="text-[11px] text-slate-500">
+      {/* Left: hamburger (mobile) + title */}
+      <div className="flex items-center gap-3 min-w-0">
+        {onOpenSidebar && (
+          <button
+            type="button"
+            onClick={onOpenSidebar}
+            aria-label="Open menu"
+            className="lg:hidden flex-shrink-0 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <Bars3Icon className="w-6 h-6" />
+          </button>
+        )}
+        <div className="min-w-0">
+          <h1 className="text-sm sm:text-base font-medium text-white truncate">Dashboard</h1>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 hidden sm:block">
             Real-time transaction analytics
           </p>
         </div>
       </div>
 
       {/* Right side - Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
         {/* Search: real search on Transaction Ledger; typing auto-switches to Transactions (handled in page) */}
         <div className="relative hidden md:block">
           <MagnifyingGlassIcon className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
@@ -92,10 +105,10 @@ export function Header({
           initial={reduceMotion ? false : { scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: reduceMotion ? 0 : 0.3, type: "spring" }}
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium bg-emerald-500/8 border border-emerald-500/15 text-emerald-400"
+          className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-emerald-500/8 border border-emerald-500/15 text-emerald-400 whitespace-nowrap"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Live • {getTimeAgo(lastUpdated)}</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></span>
+          <span>Live<span className="hidden sm:inline"> • {getTimeAgo(lastUpdated)}</span></span>
         </motion.div>
 
         {/* Notifications: popover real */}
