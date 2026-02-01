@@ -2,7 +2,7 @@
 
 [**Live demo →**](https://proud-essence-production-fc99.up.railway.app)
 
-[![Dashboard Preview](docs/preview.png)](https://proud-essence-production-fc99.up.railway.app)
+[![Dashboard Preview](docs/preview.png?v=2)](https://proud-essence-production-fc99.up.railway.app)
 
 > **Real-time transaction analytics platform with vector-based ETL.**  
 > Designed for high-volume financial data integrity and decision-making.
