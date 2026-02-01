@@ -91,15 +91,79 @@ If the backend is not running, the frontend shows demo data and a clear message 
 
 ---
 
-## ETL (optional)
+## ETL Pipeline
 
-From repo root, with `DATABASE_URL` set in `.env`:
+The project includes a **vectorized ETL** that turns messy, synthetic transaction data into a clean PostgreSQL table. The pipeline is the single source of truth for what gets shown in the dashboard.
+
+### Input: raw transaction data
+
+The ETL reads a JSON file at **`raw_transactions.json`** (repo root). Each record is intentionally "dirty" to mimic real-world data:
+
+| Field | Raw format | Notes |
+| :--- | :--- | :--- |
+| `id` | UUID string | Unique per record. |
+| `timestamp` | **Mixed:** ISO 8601 (`2026-05-30T21:34:23`) or local (`31/01/2025 11:17`, `02/05/2024 18:34`) | Must be parsed into a single datetime. |
+| `amount_str` | **Mixed:** `$12,759.76`, `49.605,06 €`, `COP 24,368`, `£36,664.87`, `$33,298.90 MXN` | US vs European number format; symbol/code; multiple currencies. |
+| `status` | `COMPLETED`, `FAILED`, `PENDING`, `REFUNDED` | Pass-through. |
+| `client_details` | **Nested object:** `{ "email", "ip_address", "device" }` | Flattened into top-level columns. |
+| `metadata` | String or null | Pass-through (optional notes). |
+
+A **sample** of this input (5 records showing the dirty formats) is in the repo: [**docs/sample_raw_transactions.json**](docs/sample_raw_transactions.json).
+
+### How the data is generated
+
+The full `raw_transactions.json` is **not** committed (it can be large). You generate it with:
+
+```bash
+python etl_scripts/generate_data.py   # writes raw_transactions.json in project root
+```
+
+That script (Faker + Pandas) produces ~5,000 records with mixed timestamps, mixed amount formats, ~5% duplicates, ~2% null amounts, and nested `client_details`. It is designed to stress-test the ETL.
+
+### Transformations (what the ETL does)
+
+The pipeline ([**etl_scripts/etl_pipeline.py**](etl_scripts/etl_pipeline.py)) runs in order:
+
+1. **Load JSON** — Read `raw_transactions.json` into a Pandas DataFrame.
+2. **Flatten nested fields** — Expand `client_details` into `client_email`, `client_ip`, `client_device`; drop the nested object.
+3. **Clean timestamps** — Parse both ISO 8601 and `DD/MM/YYYY HH:mm` into a single timezone-aware datetime; drop or count rows that fail to parse.
+4. **Clean amounts** — Parse `amount_str` into numeric `amount` and ISO `currency`:
+   - Detect currency by symbol (`$`, `€`, `£`) or code (`COP`, `MXN`).
+   - Handle US format (e.g. `1,200.50`) vs European (e.g. `1.200,50`); strip symbols and normalize to float.
+   - Rows with unparseable or null amounts are dropped.
+5. **Remove duplicates** — Deduplicate by `id`, keeping the last occurrence.
+6. **Column order** — Final columns: `id`, `timestamp`, `amount`, `currency`, `status`, `client_email`, `client_ip`, `client_device`, `metadata`. The original `amount_str` is dropped.
+7. **Load to PostgreSQL** — Insert into table `transactions` with explicit types (e.g. `NUMERIC(15,2)` for amounts, `TIMESTAMP WITH TIME ZONE` for timestamps). Uses `if_exists='replace'` and chunked writes.
+
+All steps use **Pandas** (vectorized where possible); no row-by-row Python loops for the main transform.
+
+### Output: PostgreSQL table
+
+After the ETL, the backend reads from a table like:
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | VARCHAR(36) | Transaction UUID. |
+| `timestamp` | TIMESTAMP WITH TIME ZONE | Normalized datetime. |
+| `amount` | NUMERIC(15, 2) | Numeric amount. |
+| `currency` | VARCHAR(3) | ISO code (USD, EUR, GBP, COP, etc.). |
+| `status` | VARCHAR(20) | COMPLETED, FAILED, PENDING, REFUNDED. |
+| `client_email` | VARCHAR(255) | From flattened client_details. |
+| `client_ip` | VARCHAR(45) | From flattened client_details. |
+| `client_device` | VARCHAR(20) | From flattened client_details. |
+| `metadata` | VARCHAR(500) | Optional note. |
+
+The **backend** does not write to this table; it only reads. It computes `amount_usd` at query time using fixed exchange rates (USD, EUR, GBP, COP) for KPIs and charts.
+
+### Run the ETL
+
+From repo root, with `DATABASE_URL` in `.env`:
 
 ```bash
 pip install -r etl_scripts/requirements.txt   # or root requirements.txt
-python etl_scripts/generate_data.py            # writes raw_transactions.json
-python etl_scripts/etl_pipeline.py             # loads into PostgreSQL
-python etl_scripts/verify_database.py          # sanity check
+python etl_scripts/generate_data.py           # writes raw_transactions.json
+python etl_scripts/etl_pipeline.py            # cleans and loads into PostgreSQL
+python etl_scripts/verify_database.py         # sanity check
 ```
 
 ---

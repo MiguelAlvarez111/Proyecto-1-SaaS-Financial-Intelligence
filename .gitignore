@@ -32,6 +32,7 @@ wheels/
 !package.json
 !frontend/tsconfig.json
 !frontend/package.json
+!docs/sample_raw_transactions.json
 
 # Environment variables
 .env
