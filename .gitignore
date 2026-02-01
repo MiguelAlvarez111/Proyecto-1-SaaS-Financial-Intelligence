@@ -30,6 +30,8 @@ wheels/
 *.parquet
 !requirements.txt
 !package.json
+!frontend/tsconfig.json
+!frontend/package.json
 
 # Environment variables
 .env
