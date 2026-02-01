@@ -48,3 +48,7 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db
+
+# Internal docs (not published)
+CURRENT_ARCHITECTURE.md
+PROJECT_CONTEXT.md
